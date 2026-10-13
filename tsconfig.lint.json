@@ -1,0 +1,31 @@
+{
+  // A project that covers **every** TypeScript file in the repository, for ESLint's project service
+  // only. The build uses the per-package `tsconfig.json` files, which each compile one `src/`
+  // directory with a `rootDir`; a test file or a script outside those cannot be added to them without
+  // changing the emitted layout.
+  //
+  // `noEmit` and `composite: false` because this project exists to be *read*: nothing is built from it.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@synra/client": ["packages/client/src/index.ts"],
+      "@synra/protocol": ["packages/protocol/src/index.ts"],
+      "@synra/testkit": ["packages/testkit/src/index.ts"],
+      "synra": ["packages/synra/src/index.ts"]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*.ts",
+    "packages/*/test/**/*.ts",
+    "packages/*/type-tests/**/*.ts",
+    "packages/*/*.config.ts",
+    "scripts/**/*.ts"
+  ]
+}

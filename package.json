@@ -1,0 +1,30 @@
+{
+  "name": "synra-js",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.15.1",
+  "engines": { "node": ">=20.19" },
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "check": "tsc -b && pnpm run types:consumer && pnpm run shapes",
+    "types:consumer": "tsx scripts/link-dist.ts && tsc -p packages/client/type-tests/tsconfig.json",
+    "shapes": "tsx scripts/check-shapes.ts",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "sync": "pnpm --filter @synra/protocol sync",
+    "release": "bumpp -r"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@types/node": "^24.0.0",
+    "bumpp": "^10.1.0",
+    "eslint": "^9.20.0",
+    "prettier": "^3.4.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.24.0",
+    "vitest": "^3.0.0"
+  }
+}

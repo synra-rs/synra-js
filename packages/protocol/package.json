@@ -1,0 +1,27 @@
+{
+  "name": "@synra/protocol",
+  "version": "0.1.0",
+  "description": "Synra wire protocol types. Generated from the Rust kernel; do not edit by hand.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "vitest run --passWithNoTests",
+    "sync": "tsx ../../scripts/gen-protocol-types.ts"
+  },
+  "dependencies": {
+    "synra": "workspace:^"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

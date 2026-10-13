@@ -1,0 +1,28 @@
+{
+  // A consumer project, deliberately **separate** from the package's own build. Its purpose is to
+  // prove the property the package exists for: that `types: ["@synra/client"]` is enough to get the
+  // global `synra`, with no `include`, no triple-slash directive and no import.
+  //
+  // It reads the **built** output, which is what makes it a real check: that is the state a plugin
+  // author's install is in. TypeScript resolves a `types` entry as a directory under a type root, so
+  // `node_modules/@synra/client` has to exist with a `package.json` and its `types` pointing at a
+  // declaration file. `scripts/link-dist.ts` creates that shape under `type-tests/node_modules`,
+  // which is what a publish produces without the round trip through the registry.
+  //
+  // Which means it runs **after** a build. `pnpm run check` orders it that way.
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["@synra/client"],
+    "typeRoots": ["./node_modules/@types", "./node_modules"],
+    "baseUrl": ".",
+    "paths": {
+      "@synra/protocol": ["../../protocol/dist/index.d.ts"]
+    }
+  },
+  "include": ["."]
+}
