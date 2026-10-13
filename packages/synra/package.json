@@ -1,0 +1,32 @@
+{
+  "name": "synra",
+  "version": "0.1.0",
+  "description": "The aggregate type surface for Synra plugin authors. Zero runtime; usually resolved transitively.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@synra/protocol": "workspace:^"
+  },
+  "peerDependencies": {
+    "@synra/client": "workspace:^"
+  },
+  "peerDependenciesMeta": {
+    "@synra/client": { "optional": true }
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

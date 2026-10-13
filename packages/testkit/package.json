@@ -1,0 +1,29 @@
+{
+  "name": "@synra/testkit",
+  "version": "0.1.0",
+  "description": "A fake Synra client for plugin authors: run a plugin's UI without the host.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@synra/client": "workspace:^",
+    "@synra/protocol": "workspace:^"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

@@ -12,7 +12,7 @@
 > | [`design-docs`](https://github.com/synra-rs/design-docs)     | 设计文档（内部，唯一权威）                        |
 > | [`docs`](https://github.com/synra-rs/docs)                   | 官网 + 用户文档 + schema（对外，`synra-app.dev`）  |
 >
-> ⚠️ **尚未开始实现。** 目前只有这份 README。
+> ✅ 四个包的骨架、类型与 testkit 已实现；`pnpm run check` 会核对 TS 类型与 Rust 侧一致。
 
 **为什么单独一个仓库**：这些包被**第三方**（插件作者）依赖、有独立的发布节奏、有自己的一套
 Node 工具链 —— 放进 `synra-app` 会让它的 CI 变成两个项目拼在一起。
