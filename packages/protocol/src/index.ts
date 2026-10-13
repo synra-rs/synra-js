@@ -47,6 +47,33 @@ export type {
   // 发现
 } from './generated/wire'
 
+// 宿主界面的形状与内核推给它的增量事件。与 `wire` 分开：那里是设备之间的协议，这里是内核与自己的
+// 界面之间。
+export type {
+  DeviceCard,
+  IdentitySnapshot,
+  IntentCandidate,
+  IntentPrompt,
+  IntentSnapshot,
+  PairingPrompt,
+  PluginHealthDto,
+  PluginSnapshot,
+  ScanState,
+  TransferSnapshot,
+  TransferSummary,
+  UpdateInfo,
+} from './generated/ui'
+
+export type {
+  EventVerdict,
+  KernelEvent,
+  KernelEventEnvelope,
+  SequenceReport,
+  SequencedKernelEvent,
+} from './generated/events'
+
+export { isDelta, MAX_COUNTED_GAP, SequenceTracker } from './generated/events'
+
 export {
   FrameKind,
   FRAME_HEADER_LEN,
