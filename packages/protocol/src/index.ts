@@ -51,6 +51,7 @@ export type {
 // 界面之间。
 export type {
   DeviceCard,
+  DevicesSnapshot,
   IdentitySnapshot,
   IntentCandidate,
   IntentPrompt,

@@ -36,6 +36,22 @@ export interface TransferSummary {
   readonly progress: number
 }
 
+/**
+ * 设备页的一次完整回答。
+ *
+ * ★ 与 Rust 的 `DevicesSnapshot` 逐字段对应：字段名是 `devices` 而不是 `cards`，而 `scanning` 是**进行中的扫描**
+ * 本身（`ScanState`）而不是一个布尔值。手写镜像在这两处都会写错 —— 一个 `cards` 会以 `undefined` 到达（列表
+ * 空白、无任何报错），而一个布尔 `scanning` 会丢掉扫描进度，界面于是只能显示"正在扫描"而说不出扫到哪一步。
+ */
+export interface DevicesSnapshot {
+  /** 本机，免得界面再发一次请求。 */
+  readonly identity: IdentitySnapshot
+  /** 全部设备，已配对的在前。 */
+  readonly devices: readonly DeviceCard[]
+  /** 正在进行的扫描，没有就是没有。 */
+  readonly scanning?: ScanState
+}
+
 /** 设备列表里的一张卡片。 */
 export interface DeviceCard {
   readonly deviceId: string
