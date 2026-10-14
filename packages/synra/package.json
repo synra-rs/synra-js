@@ -12,20 +12,16 @@
     }
   },
   "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -b",
     "test": "vitest run --passWithNoTests"
   },
-  "dependencies": {
-    "@synra/protocol": "workspace:^"
-  },
-  "peerDependencies": {
-    "@synra/client": "workspace:^"
-  },
-  "peerDependenciesMeta": {
-    "@synra/client": { "optional": true }
-  },
   "devDependencies": {
+    "@synra/client": "workspace:^",
+    "@synra/protocol": "workspace:^",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
   }

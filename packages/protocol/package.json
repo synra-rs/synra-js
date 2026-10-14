@@ -12,13 +12,13 @@
     }
   },
   "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -b",
     "test": "vitest run --passWithNoTests",
     "sync": "tsx ../../scripts/gen-protocol-types.ts"
-  },
-  "dependencies": {
-    "synra": "workspace:^"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
