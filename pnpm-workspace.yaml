@@ -1,9 +1,6 @@
 packages:
   - packages/*
 
-allowBuilds:
-  esbuild: set this to true or false
-
 # esbuild ships a native binary built by a postinstall script. Allowing it is required for
 # `tsx` and `vitest`; nothing else in this workspace runs build scripts.
 onlyBuiltDependencies:

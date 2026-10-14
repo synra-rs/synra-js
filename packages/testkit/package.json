@@ -9,18 +9,23 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.mjs"
     }
   },
   "types": "./dist/index.d.ts",
-  "module": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "main": "./dist/index.mjs",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -b",
     "test": "vitest run"
   },
   "dependencies": {
     "@synra/client": "workspace:^",
-    "@synra/protocol": "workspace:^"
+    "@synra/protocol": "workspace:^",
+    "synra": "workspace:^"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
