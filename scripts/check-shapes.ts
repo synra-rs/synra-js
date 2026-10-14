@@ -325,7 +325,7 @@ if (rustSource !== null) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6 · 零运行时：三个纯类型包不许有 .js 入口
+// 6 · 零运行时：三个纯类型包不许有 .js 入口，也不许产出 .js 文件
 // ─────────────────────────────────────────────────────────────────────────────
 
 {
@@ -355,7 +355,23 @@ if (rustSource !== null) {
       )
     }
     if (entry['types'] === undefined) {
-      fail(`packages/${name}`, 'a type-only package must declare `exports["."].types`')
+      fail(`packages/${name}`, 'a type-only package must not declare `exports["."].types`')
+    }
+
+    // ★ 声明的入口只是一半：`tsc` 默认会为每个模块产出 `.js`，而一个**发布出去但没人指向**的运行时
+    //   文件，是消费方的打包器可以自由选中的东西。`emitDeclarationOnly` 才是让它不存在的那一步，这里
+    //   检查它确实生效了。dist 不存在（还没构建）就跳过：那是"没构建"，不是"构建错了"。
+    const dist = join(jsRoot, 'packages', name, 'dist')
+    if (existsSync(dist)) {
+      const stray = readdirSync(dist, { recursive: true })
+        .map(String)
+        .filter((entry_) => entry_.endsWith('.js') || entry_.endsWith('.mjs'))
+      if (stray.length > 0) {
+        fail(
+          `packages/${name}/dist`,
+          `a type-only package emitted runtime files: ${stray.join(', ')}`,
+        )
+      }
     }
   }
   evidence.push(`${String(typeOnly.length)} type-only packages checked for a runtime entry`)

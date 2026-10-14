@@ -12,12 +12,16 @@
     }
   },
   "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -b",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@synra/protocol": "workspace:^"
+    "@synra/protocol": "workspace:^",
+    "synra": "workspace:^"
   },
   "devDependencies": {
     "typescript": "^5.7.0",

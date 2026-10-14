@@ -41,16 +41,6 @@ importers:
       '@synra/protocol':
         specifier: workspace:^
         version: link:../protocol
-    devDependencies:
-      typescript:
-        specifier: ^5.7.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.0.0
-        version: 3.2.7(@types/node@24.19.2)(jiti@2.7.0)(supports-color@7.2.0)(tsx@4.23.15)(yaml@2.9.1)
-
-  packages/protocol:
-    dependencies:
       synra:
         specifier: workspace:^
         version: link:../synra
@@ -62,15 +52,23 @@ importers:
         specifier: ^3.0.0
         version: 3.2.7(@types/node@24.19.2)(jiti@2.7.0)(supports-color@7.2.0)(tsx@4.23.15)(yaml@2.9.1)
 
+  packages/protocol:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.7(@types/node@24.19.2)(jiti@2.7.0)(supports-color@7.2.0)(tsx@4.23.15)(yaml@2.9.1)
+
   packages/synra:
-    dependencies:
+    devDependencies:
       '@synra/client':
         specifier: workspace:^
         version: link:../client
       '@synra/protocol':
         specifier: workspace:^
         version: link:../protocol
-    devDependencies:
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
@@ -86,6 +84,9 @@ importers:
       '@synra/protocol':
         specifier: workspace:^
         version: link:../protocol
+      synra:
+        specifier: workspace:^
+        version: link:../synra
     devDependencies:
       typescript:
         specifier: ^5.7.0
