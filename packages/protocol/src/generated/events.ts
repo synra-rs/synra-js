@@ -1,14 +1,13 @@
 /* eslint-disable */
 /**
- * ⚠️ 自动生成，请勿手动修改。
+ * ⚠️ **手写镜像，由脚本核对** —— 不是自动生成的。
  *
- * 来源：synra-core/crates/synra-ipc/src/event.rs
- * 生成：cargo test -p synra-ipc --features ts-export
- * 同步：pnpm --filter @synra/protocol sync
+ * 来源：synra-rust-core/crates/synra-ipc/src/event.rs
+ * 核对：synra-js/scripts/check-shapes.ts
  *
- * 内核推给宿主界面的**增量事件**。与 `wire.ts` 是两回事：那里是设备之间的协议，这里是内核告诉
- * 自己的界面"什么变了"。名字偶尔重叠而距离不同 —— 从对端收到的 `_synra.device.changed` 和这里的
- * `deviceCardUpdated` 是同一个事实在两个距离上的样子。
+ * ★ 这里曾经写着"自动生成，请勿手动修改"，并给出 `cargo test -p synra-ipc --features ts-export`
+ * 这条命令。**那条命令跑不起来**：synra-ipc 没有 `[features]` 段，`ts_export.rs` 只生成
+ * `ErrorCode` 与 `SuggestedAction` 两个联合类型，不生成本文件。本文件是手写的。
  */
 
 import type {
