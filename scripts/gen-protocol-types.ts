@@ -1,117 +1,58 @@
 #!/usr/bin/env tsx
 /**
- * 从内核仓库拉协议类型。
+ * 核对协议类型镜像与内核，**不再生成**。
  *
- * # 为什么生成物要 commit 进仓库
+ * # 这个脚本以前做什么，以及为什么停下了
  *
- * 插件作者的 UI 代码只用发布包：他们不写 Rust、不编译 Rust。所以发布包必须**自带完整类型**，
- * 而"发布时再生成"会让发布依赖两个仓库的 CI 同时可用。
+ * 它以前跑 `cargo test -p synra-protocol --features ts-export`，把导出的 `.ts` 复制到
+ * `packages/protocol/src/generated/`，再给每个文件加上"请勿手改"的头注释。
  *
- * 另外，生成物进 diff 让"线上契约变了"在 review 里可见 —— 那是一个需要被看见的改动，不是一个
- * 构建细节。
+ * 那条命令跑不起来。`synra-protocol` 没有 `[features]` 段，也没有 `ts_export` 模块 —— 整个导出路径
+ * 从来没有存在过。`synra-ipc` 里确实有一个 `ts_export.rs`，但它只生成 `ErrorCode` 和
+ * `SuggestedAction` 两个联合类型，**不生成** `ui.ts` / `wire.ts` / `events.ts`。这三个文件是手写的。
  *
- * # 这个脚本做的事
+ * 一个跑不起来的生成器比没有生成器更糟：头注释写着"自动生成，请勿手动修改"，于是没有人去查；
+ * `check-shapes.ts` 原来断言的也是那几行注释在，于是检查保护的是这句话本身，而不是它说的事。
  *
- * 1. 在 `synra-rust-core` 里跑 `cargo test -p synra-protocol --features ts-export`，导出到
- *    `target/ts-export/`。
- * 2. 把导出的 `.ts` 复制到 `packages/protocol/src/generated/`。
- * 3. 给每个文件加上"请勿手改"的头注释与一个 eslint-disable。
- * 4. 打印 diff 摘要，让人能看到这次同步改了什么。
+ * # 现在的做法
  *
- * # 没有 Rust 工具链时
+ * 不生成，只核对。`check-shapes.ts` 现在逐个字段地对照 Rust 的 DTO 与 TS 的 interface，两个方向都查，
+ * 并在两边对不上时失败。那是一项会失败的检查，所以它才能防止手写镜像漂移 —— 而一句"请勿手改"不能。
  *
- * 报错退出，而不是写一个空文件。一个"同步成功但什么都没同步"的结果比失败更糟：它会让守卫通过，
- * 而类型其实没更新。
+ * 生成仍然是更好的方向：一份 DTO 声明生成一份 TS，比手写镜像更难出错。做到它需要先在
+ * `synra-protocol` / `synra-ipc` 里有一个真的导出器；那时候这个脚本会重新变成生成器，而在此之前，
+ * 诚实地核对比假装生成要有用。
+ *
+ * # 退出码
+ *
+ * 核对失败时退出非零。核对通过时也退出非零并说明原因 —— 因为这个脚本已经不产出任何东西，
+ * 让人以为"跑一下就重新生成过了"比让它明确地说"这里没有生成器"要糟。
  */
 
-import { execFileSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const jsRoot = resolve(here, '..')
-const repoRoot = resolve(jsRoot, '..')
-const coreRoot = join(repoRoot, 'synra-rust-core')
-const exportDir = join(coreRoot, 'target', 'ts-export')
-const targetDir = join(jsRoot, 'packages', 'protocol', 'src', 'generated')
-
-/** 每个生成文件的开头。三行内容被 `check-shapes.ts` 断言，所以改这里要同时改那里。 */
-function header(source: string): string {
-  return `/* eslint-disable */
-/**
- * ⚠️ 自动生成，请勿手动修改。
- *
- * 来源：${source}
- * 生成：cargo test -p synra-protocol --features ts-export
- * 同步：pnpm --filter @synra/protocol sync
- */
-`
-}
+const coreRoot = join(jsRoot, '..', 'synra-rust-core')
+const dtoDirectory = join(coreRoot, 'crates', 'synra-ipc', 'src', 'dto')
+const generatedDir = join(jsRoot, 'packages', 'protocol', 'src', 'generated')
 
 function main(): void {
-  if (!existsSync(coreRoot)) {
-    console.error(
-      `✗ the kernel repository was not found at ${coreRoot}\n` +
-        '  `sync` needs it: the protocol types are generated from the Rust crate, not written here.',
-    )
-    process.exit(1)
+  console.error('✗ `sync` does not generate anything.\n')
+  console.error('  `packages/protocol/src/generated/` is hand-written. It used to claim otherwise, and the claim\n')
+  console.error('  named a command that cannot run: `synra-protocol` has no `ts-export` feature and no exporter.\n')
+  console.error('  The mirror is now checked field by field instead, which is a check that can fail — run\n')
+  console.error('  `pnpm run shapes` to see whether the mirror still matches the kernel.\n')
+
+  if (existsSync(dtoDirectory)) {
+    const dtos = readdirSync(dtoDirectory).filter((name: string): boolean => name.endsWith('.rs')).length
+    const files = readdirSync(generatedDir).filter((name: string): boolean => name.endsWith('.ts')).length
+    console.error(`  ${String(dtos)} Rust DTO file(s) are mirrored by ${String(files)} hand-written file(s).\n`)
   }
 
-  console.log('· running the Rust export …')
-  try {
-    execFileSync('cargo', ['test', '-p', 'synra-protocol', '--features', 'ts-export'], {
-      cwd: coreRoot,
-      stdio: 'inherit',
-    })
-  } catch {
-    console.error(
-      '✗ the Rust export failed. The types were not changed, so the committed ones are still the\n' +
-        '  previous generation — run `pnpm run shapes` to see whether they still match the crate.',
-    )
-    process.exit(1)
-  }
-
-  if (!existsSync(exportDir)) {
-    console.error(
-      `✗ cargo reported success but ${exportDir} does not exist.\n` +
-        '  Check that the `ts-export` feature writes there; refusing to write an empty generation.',
-    )
-    process.exit(1)
-  }
-
-  const files = readdirSync(exportDir).filter((name) => name.endsWith('.ts'))
-  if (files.length === 0) {
-    console.error(`✗ ${exportDir} contains no .ts files; refusing to write an empty generation.`)
-    process.exit(1)
-  }
-
-  mkdirSync(targetDir, { recursive: true })
-  let changed = 0
-  for (const name of files) {
-    const source = readFileSync(join(exportDir, name), 'utf8')
-    const withHeader = `${header('synra-core/crates/synra-protocol')}${source.replace(/^\/\* eslint-disable \*\/\n/, '')}`
-    const destination = join(targetDir, name)
-    const previous = existsSync(destination) ? readFileSync(destination, 'utf8') : ''
-    if (previous !== withHeader) changed += 1
-    writeFileSync(destination, withHeader, 'utf8')
-  }
-
-  // 入口文件也要重写一次，因为内核导出的类型集合可能变了。
-  cpSync(exportDir, targetDir, { recursive: true, force: true })
-
-  console.log(
-    changed === 0
-      ? `✓ ${files.length} file(s) synced; nothing changed`
-      : `✓ ${files.length} file(s) synced; ${changed} changed — review the diff, then commit`,
-  )
-
-  if (changed > 0) {
-    console.log(
-      '  a changed generated type means the wire contract changed. That is a deliberate act:\n' +
-        '  bump the three packages together (`pnpm run release`) and say so in the changelog.',
-    )
-  }
+  process.exit(1)
 }
+
 
 main()
