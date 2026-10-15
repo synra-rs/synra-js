@@ -122,105 +122,29 @@ export type EventVerdict =
   /** 应用它**并且**重新取快照。用于界面不认识的事件。 */
   | { readonly kind: 'applyAndRefresh' }
 
-/** 值得计数的最大间隙。 */
-export const MAX_COUNTED_GAP = 1000
+// ★ 这里原本还有 `MAX_COUNTED_GAP`、`SequenceTracker`、`isDelta`
+//   和它们的测试，现在移到了它们唯一的消费方：
+//   `synra-rust-app/src/ipc/sequence.ts`。
+//
+//   理由是这个包的契约：`@synra/protocol` 是**纯类型**包
+//   （设计文档 25 §2.1 的“有运行时？”一栏是 ❌），
+//   `package.json` 只给 `types`、构建也不产出 `.js`。
+//   一个带实现的类放在这里，对消费者来说就是一个只能编译、不能运行的承诺。
+//   它们之前确实从这个包的入口导出过，而第一个真正导入它们的消费者
+//   （应用的 `src/ipc/dispatcher.ts`）就是被类型检查抳住的。
+//
+//   这里保留的是**形状**：`EventVerdict` / `KernelEvent` / `SequenceReport` 等类型。
+//   TS 这一侧只需要能命名那些字节；序号的算术则由真正需要它的那一侧拥有。
 
-/** 序号跟踪器的快照，用于诊断包。 */
+/**
+ * 序号跟踪器的快照，用于诊断包。
+ *
+ * ★ 这是一个**类型**，所以它留在这里 —— 而它的实现者（`SequenceTracker`）
+ * 在真正需要它的那一侧：`synra-rust-app/src/ipc/sequence.ts`。
+ * 原本它与那个类写在同一段里，而删掉那段时差点把它一起删掉：
+ * 它定义在常量**之后**，而那正好是切割点。
+ */
 export interface SequenceReport {
   readonly last?: number
   readonly gaps: number
-}
-
-/**
- * 跟踪序号，让界面能分清"间隙"与"重复"。
- *
- * 只持有最后一个序号，不含运行时：调用方喂进每一个信封，按裁决行事。这样做的原因与 Rust 侧一样 ——
- * 这段算术就是机制的全部，而它是唯一会答错的东西。
- */
-export class SequenceTracker {
-  private last: number | undefined
-  private gapCount = 0
-  private stale = false
-
-  /** 已应用的最后一个序号。 */
-  get lastSeen(): number | undefined {
-    return this.last
-  }
-
-  /** 报告过多少次间隙。 */
-  get gaps(): number {
-    return this.gapCount
-  }
-
-  /**
-   * 画面是否已知不可信。
-   *
-   * 从报告一次间隙起为真，直到快照回应为止。此时仍然渲染的调用方，展示的是它自己知道不对的东西。
-   */
-  get isStale(): boolean {
-    return this.stale
-  }
-
-  /**
-   * 判断一个事件并记录它。
-   *
-   * ★ **第一个事件不是间隙。** 什么都没见过时接受任何序号：内核的计数器从一开始，所以中途启动的界面
-   * 否则会立刻报一次间隙，去重读它刚取过的快照。
-   */
-  observe(seq: number): EventVerdict {
-    const last = this.last
-
-    if (last === undefined) {
-      this.last = seq
-      return { kind: 'apply' }
-    }
-    if (seq <= last) {
-      // 重复。**不推进序号** —— 推进会让下一个连续事件看起来像间隙。
-      return { kind: 'ignoreRepeat' }
-    }
-    if (seq === last + 1) {
-      this.last = seq
-      return { kind: 'apply' }
-    }
-
-    // 间隙。记下来并标记画面不可信。
-    const missed = seq - (last + 1)
-    this.last = seq
-    this.gapCount += 1
-    this.stale = true
-    // 几千的跳变给出的是没人会读的数字，而对一个来自外部的值做减法可能溢出。
-    return missed <= MAX_COUNTED_GAP ? { kind: 'refreshSnapshot', missed } : { kind: 'refreshSnapshot' }
-  }
-
-  /** 记录已取过一次快照，画面重新可信。 */
-  snapshotTaken(): void {
-    this.stale = false
-  }
-
-  /**
-   * 忘掉一切，用于界面被重载。
-   *
-   * 序号**不跨重载持久化**：回来的界面会取快照，而记住的序号会让重载后的第一个事件看起来像间隙。
-   */
-  reset(): void {
-    this.last = undefined
-    this.stale = false
-  }
-
-  /** 诊断用的快照。 */
-  report(): SequenceReport {
-    return this.last === undefined
-      ? { gaps: this.gapCount }
-      : { last: this.last, gaps: this.gapCount }
-  }
-}
-
-/**
- * 一个事件是否携带增量。
- *
- * 今天全部为 `false`：每个事件带的是**绝对值**（进度是比例而非字节数），所以重复应用它不改变什么。
- * 这个函数存在，是为了将来某个携带增量的事件必须自己说出来，而不是被当作幂等的。
- */
-export function isDelta(_event: KernelEvent): boolean {
-  return false
 }
