@@ -1,18 +1,15 @@
 /* eslint-disable */
 /**
- * ⚠️ 自动生成，请勿手动修改。
+ * ⚠️ **手写镜像，由脚本核对** —— 不是自动生成的。
  *
- * 来源：synra-core/crates/synra-protocol
- * 生成：cargo test -p synra-protocol --features ts-export
- * 同步：pnpm --filter @synra/protocol sync
+ * 来源：synra-rust-core/crates/synra-protocol/src
+ * 核对：synra-js/scripts/check-shapes.ts
  *
- * 本文件是**形状的镜像**：Rust 侧是唯一真相源，此处的每个字段都与一个 serde 字段对应，
- * 且大小写与 `#[serde(rename_all = …)]` 一致。`scripts/check-shapes.ts` 会核对两者，
- * 所以手改会被 CI 拒绝。
+ * ★ 这里曾经写着"自动生成，请勿手动修改"，并给出 `cargo test -p synra-protocol --features ts-export`
+ * 这条命令。**那条命令跑不起来**：synra-protocol 没有 `[features]` 段，也没有 `ts_export` 模块，
+ * 导出路径从来没有存在过。一个跑不起来的生成器比没有生成器更糟 —— 它让人以为不必再查，
+ * 而这个文件里真正的失效是静默的：Rust 改了字段名，TS 侧收到 `undefined`，表现是面板空白。
  *
- * ★ 命名大小写不是风格问题：`ErrorCode` 是 `snake_case`，`SynraError` 的字段是 `camelCase`。
- * 两者在同一个结构里出现，所以改错一处就是一个线上解析失败。
- */
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 帧（§4）
