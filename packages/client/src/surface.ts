@@ -325,6 +325,24 @@ export interface SynraClient {
   /** 判定是不是某个具体的错误码，用于 `if (synra.isCode(e, 'capability_denied'))`。 */
   isCode(value: unknown, code: import('@synra/protocol').ErrorCode): boolean
   /**
+   * 判定一次失败是不是"能力被拒"。
+   *
+   * ★ 与 `isCode(e, 'capability_denied')` 是同一件事，但收窄得更准：收窄到
+   * `code: 'capability_denied'` 的字面量，所以 `catch` 里的分支能直接读到那个码，
+   * 而不必再断言一次。它不是 `isCode` 的别名 —— 一个返回 `boolean` 的函数
+   * 无法让 TypeScript 在分支里收窄类型，而那正是作者写 `if` 时想要的。
+   *
+   * 设计文档 §4.1 列了它，而实现里一直没有：文档 §5.2 和 §8 的示例都在用它，
+   * 所以作者照着抄会得到一个不存在的方法。
+   */
+  isCapabilityDenied(value: unknown): value is import('@synra/protocol').SynraError & { code: 'capability_denied' }
+  /**
+   * 告诉宿主"页面已挂载完成"。
+   *
+   * 同步且对调用方无副作用：宿主的加载态切换与超时判定靠它，而页面不需要等待回答。
+   */
+  ready(): void
+  /**
    * 一个请求标识，用于把自己的多次调用归到一起。
    *
    * 由宿主生成而不是 `crypto.randomUUID()`：标识要进内核的去重表，而内核要能确认它是随机的。
