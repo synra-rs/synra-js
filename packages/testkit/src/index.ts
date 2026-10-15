@@ -139,6 +139,8 @@ export class MockSynraClient implements SynraClient {
   private readonly deviceWatchers = new Set<(devices: DeviceTarget[]) => void>()
   private readonly progressWatchers = new Map<TransferId, Set<(progress: TransferProgress) => void>>()
   private nextId = 0
+  /** How many times a page under test has reported itself ready. */
+  private readyCalls = 0
 
   constructor(options: MockOptions = {}) {
     this.options = options
@@ -593,6 +595,33 @@ export class MockSynraClient implements SynraClient {
 
   isCode(value: unknown, code: ErrorCode): boolean {
     return this.isSynraError(value) && value.code === code
+  }
+
+  /**
+   * Whether a failure is a capability refusal, narrowing to the literal code.
+   *
+   * ★ Added with `ready` when the interface gained both: the compiler listed this class as the implementer that no
+   * longer satisfies `SynraClient`, which is what an interface change is supposed to do. The mock has to answer the same
+   * question the host does, or a plugin's tests would pass against a facade that cannot deny anything.
+   */
+  isCapabilityDenied(value: unknown): value is SynraError & { code: 'capability_denied' } {
+    return this.isSynraError(value) && value.code === 'capability_denied'
+  }
+
+  /**
+   * Tells the mock host the page has mounted.
+   *
+   * A no-op that records the call, because the contract is synchronous and side-effect free from the page's side — the
+   * real host watches for it to switch its loading state. Recording rather than ignoring means a test can assert that a
+   * component called it, which is the only thing a page author can get wrong here.
+   */
+  ready(): void {
+    this.readyCalls += 1
+  }
+
+  /** How many times a page under test reported itself ready. */
+  get readyCount(): number {
+    return this.readyCalls
   }
 
   requestId(): string {
