@@ -45,6 +45,7 @@ export type {
   TransferProgress,
   TransferAbortReason,
   // 发现
+  FrameKind,
 } from './generated/wire'
 
 // 宿主界面的形状与内核推给它的增量事件。与 `wire` 分开：那里是设备之间的协议，这里是内核与自己的
@@ -73,17 +74,22 @@ export type {
   SequencedKernelEvent,
 } from './generated/events'
 
-export { isDelta, MAX_COUNTED_GAP, SequenceTracker } from './generated/events'
-
-export {
-  FrameKind,
-  FRAME_HEADER_LEN,
-  FRAME_LENGTH_OVERHEAD,
-  MAX_FRAME_LEN,
-  MAX_CHUNK_LEN,
-  MAX_PAYLOAD_LEN,
-  DEFAULT_TCP_PORT,
-  DISCOVERY_PORT,
-  MDNS_SERVICE,
-  PROTOCOL_VERSION,
-} from './generated/wire'
+// ★ 这里原本导出的是**值**：`isDelta`、`MAX_COUNTED_GAP`、`SequenceTracker`、
+//   `FrameKind`、`FRAME_HEADER_LEN`、`MAX_FRAME_LEN`、`MAX_CHUNK_LEN`、`MAX_PAYLOAD_LEN`、
+//   `FRAME_LENGTH_OVERHEAD`、`DEFAULT_TCP_PORT`、`DISCOVERY_PORT`、`MDNS_SERVICE`、`PROTOCOL_VERSION`。
+//
+//   那与本包自己的说明（“这个包里的东西都是**形状**”）和设计文档（25 §2.1：
+//   `@synra/protocol` 一栏是 ❌ 有运行时）都矛盾。而矛盾不只是文档问题：
+//   `package.json` 的 `exports` 只给 `types`、构建也不产出 `.js`，
+//   所以作者写 `import { SequenceTracker } from '@synra/protocol'`
+//   **类型检查通过、运行时解析不到** —— 拿到 `undefined` 或一个打包错误，而没有任何地方提前提醒。
+//
+//   `packages/protocol/test/events.test.ts` 的注释其实早就写明了这件事：
+//   “`@synra/protocol` 是一个**纯类型**包，所以它按设计没有运行时入口，
+//   按名字 import 会解析失败”。也就是说：**测试知道这些名字拿不到，入口却照样把它们许诺出去。**
+//
+//   这些实现留在 `generated/events.ts` 与 `generated/wire.ts` 里（那两个文件的测试直接测源码，
+//   那份测试是对的），只是不再从包的公开面出口。常量与序号逻辑的唯一真相源是 Rust 侧的
+//   `synra-protocol` / `synra-ipc`；TS 这一侧只需要能**命名**那些字节的形状。
+//   `FrameKind` 是个类型，所以它移到了上面的 `export type` 列表里 ——
+//   `export { FrameKind }` 在 `verbatimModuleSyntax` 下同时导出值与类型，删掉它必须补上类型那一半。
