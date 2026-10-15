@@ -470,12 +470,29 @@ if (rustSource !== null) {
       )
     }
     if (entry['types'] === undefined) {
-      fail(`packages/${name}`, 'a type-only package must not declare `exports["."].types`')
+      // ★ 这句话原先写反了。条件问的是"`types` **缺了**吗"，而消息说的是
+      //   "一个纯类型包**不得**声明 `exports["."].types`" —— 两者意思相反。
+      //   一份失败信息如果把人指向"删掉这个字段"，而真正该做的是"加上它"，
+      //   那比不说还糟：照着做会把包改得更坏，而且看起来像是照着报错做的。
+      fail(
+        `packages/${name}`,
+        'a type-only package must declare `exports["."].types`: it is the only way in',
+      )
     }
 
-    // ★ 声明的入口只是一半：`tsc` 默认会为每个模块产出 `.js`，而一个**发布出去但没人指向**的运行时
-    //   文件，是消费方的打包器可以自由选中的东西。`emitDeclarationOnly` 才是让它不存在的那一步，这里
-    //   检查它确实生效了。dist 不存在（还没构建）就跳过：那是"没构建"，不是"构建错了"。
+    // ★ 声明的入口和"没有 `.js`"都还不够：一个纯类型包**可以**在入口导出值。
+    //
+    //   `export const x = 1` 配上 `emitDeclarationOnly`，源码能编译，产出的是
+    //   `export declare const x: number` —— 于是声明文件向消费方承诺了一个运行时**并不存在**的值。
+    //   类型检查会通过，打包器会去找一个没有的东西，而"零运行时"这句话就变成了假的。
+    //
+    // ★ 检查的是**入口**（`dist/index.d.ts`），不是整个 `dist`。
+    //
+    //   消费方只能通过 `exports` 指的那个文件到达这个包。内部模块里有一个值，而入口只用
+    //   `export type` 把类型带出来，那这个值对消费方**不存在**，也就不构成破坏 ——
+    //   而按整个 dist 去查会把这种无害的情况也判成失败，逼着人把内部实现挪走或加白名单。
+    //   判据是入口里的 `export { ... }`（不带 `type`）：仓库开了 `verbatimModuleSyntax`，
+    //   所以"这个导出是类型还是值"由编译器强制区分，不是靠自觉。
     const dist = join(jsRoot, 'packages', name, 'dist')
     if (existsSync(dist)) {
       const stray = readdirSync(dist, { recursive: true })
@@ -486,6 +503,23 @@ if (rustSource !== null) {
           `packages/${name}/dist`,
           `a type-only package emitted runtime files: ${stray.join(', ')}`,
         )
+      }
+
+      const entryFile = join(dist, 'index.d.ts')
+      if (existsSync(entryFile)) {
+        const valueExports = [...read(entryFile).matchAll(/^export\s*\{([^}]*)\}/gm)].flatMap(
+          (match) =>
+            (match[1] ?? '')
+              .split(',')
+              .map((part) => part.trim())
+              .filter((part) => part.length > 0),
+        )
+        if (valueExports.length > 0) {
+          fail(
+            `packages/${name}/dist/index.d.ts`,
+            `a type-only package exports values with no runtime behind them: ${valueExports.join(', ')}`,
+          )
+        }
       }
     }
   }
@@ -545,6 +579,42 @@ if (rustSource !== null) {
     )
   }
   evidence.push('SynraResponse is declared once')
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9 · 四个可发布包的版本一致
+// ─────────────────────────────────────────────────────────────────────────────
+
+{
+  // ★ 为什么这值得一条守卫，而不是靠 `bumpp -r` 记得跑。
+  //
+  //   包之间用的是 `workspace:^`，发布时 pnpm 把它改写成 `^<当前版本>`。所以一旦版本错开 ——
+  //   `synra` 到了 0.2.0 而 `@synra/client` 还在 0.1.0 —— `@synra/client` 发布出去的依赖就写着
+  //   `synra@^0.1.0`，作者装到的是**另一个版本**的 facade，而两边的类型是按同一版设计的。
+  //   症状是全局 `synra` 的类型与实际注入的对象对不上，而没有任何地方会因此报错。
+  //
+  //   设计文档 §4.1 说的是"三个包同步版本"，而仓库里可发布的是**四个**（`testkit` 也是）：
+  //   它的数量也一并更正了 —— 一条只守三个包的守卫会漏掉第四个。
+  const publishable = ['client', 'protocol', 'synra', 'testkit'] as const
+  const versions = publishable.map((name) => {
+    const manifest = JSON.parse(read(join(jsRoot, 'packages', name, 'package.json'))) as {
+      readonly version?: string
+    }
+    return { name, version: manifest.version ?? '(no version)' }
+  })
+  const distinct = new Set(versions.map((entry) => entry.version))
+  if (distinct.size > 1) {
+    fail(
+      'version-sync',
+      `the publishable packages disagree on a version: ${versions
+        .map((entry) => `${entry.name}@${entry.version}`)
+        .join(', ')}`,
+    )
+  }
+  const [first] = versions
+  evidence.push(
+    `${String(versions.length)} publishable packages share version ${first?.version ?? '(none)'}`,
+  )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
