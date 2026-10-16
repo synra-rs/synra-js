@@ -1,0 +1,60 @@
+{
+  "name": "@synra/theme",
+  "version": "0.1.0",
+  "description": "The Synra design tokens, and the adapters that carry them into UnoCSS, VitePress and plain CSS.",
+  "license": "MIT",
+  "homepage": "https://github.com/synra-rs/synra-js#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synra-rs/synra-js.git",
+    "directory": "packages/theme"
+  },
+  "bugs": {
+    "url": "https://github.com/synra-rs/synra-js/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./css": {
+      "types": "./dist/css.d.ts",
+      "import": "./dist/css.js"
+    },
+    "./unocss": {
+      "types": "./dist/unocss/index.d.ts",
+      "import": "./dist/unocss/index.js"
+    },
+    "./vitepress": {
+      "types": "./dist/vitepress/index.d.ts",
+      "import": "./dist/vitepress/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "unocss": "^66.11.0"
+  },
+  "peerDependenciesMeta": {
+    "unocss": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "unocss": "^66.11.0",
+    "vitest": "^3.0.0"
+  }
+}
