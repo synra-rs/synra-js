@@ -46,9 +46,12 @@ jobs:
         # 它最容易错的地方是边界（空标签、空工作区），而内联脚本没法测那几条。
         # 标签由 Actions 经 `GITHUB_REF_NAME` 给，脚本自己去掉开头的 `v`。
         #
-        # ★ 今天四个包共用一条版本线，所以"标签 = 每个包的版本"成立。
-        # 而设计里 `@synra/theme` 会有自己的版本线（design-docs 28 §2 R1）——
-        # 那一刻起这一步要改成"标签对上**共用那条线**的那几个包"，否则它会开始误报。
+        # ★ 一条 `v*` 标签的含义是"**这个 workspace 里的每一个可发布包**都以这个号出去"。
+        #   `bumpp -r` 一次把版本推平，而 `scripts/publish.ts` **故意不去查 registry**
+        #   （"哪些已经出去了"是操作者手里的事实，不是脚本能离线查出来的东西）。
+        #   所以 `@synra/theme` 虽然与那四个包没有依赖边，发布时**仍然跟着同一个号** ——
+        #   否则第二次发布会撞上 "cannot publish over existing version"，
+        #   而那是一次**发到一半**的失败（已经发出去的那几个收不回来）。
         run: pnpm run check:release-tag
 
       - name: The kernel is available to compare against
