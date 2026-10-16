@@ -22,7 +22,7 @@
  */
 
 import { execFileSync } from 'node:child_process'
-import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -66,8 +66,8 @@ export class OrderError extends Error {
  * @throws OrderError when the graph has a cycle.
  */
 export function publishOrder(packages: readonly PackageInfo[]): string[] {
-  const published = packages.filter((entry) => entry.published)
-  const byName = new Map(published.map((entry) => [entry.name, entry]))
+  const published = packages.filter(entry => entry.published)
+  const byName = new Map(published.map(entry => [entry.name, entry]))
   const order: string[] = []
   const placed = new Set<string>()
   const visiting = new Set<string>()
@@ -126,7 +126,7 @@ export function readWorkspace(root: string): PackageInfo[] {
       dependencies?: Record<string, string>
       peerDependencies?: Record<string, string>
     }
-    if (!parsed.name) {
+    if (parsed.name === undefined || parsed.name === '') {
       throw new OrderError(`${manifest} has no name`, [entry.name])
     }
     const declared = { ...parsed.dependencies, ...parsed.peerDependencies }
@@ -136,7 +136,7 @@ export function readWorkspace(root: string): PackageInfo[] {
       // `private: true` is how a package says it is not for the registry. `testkit` is one, and publishing it would be a
       // mistake nobody notices until somebody installs it.
       published: parsed.private !== true,
-      dependsOn: Object.keys(declared).filter((name) => name === 'synra' || name.startsWith('@synra/')),
+      dependsOn: Object.keys(declared).filter(name => name === 'synra' || name.startsWith('@synra/')),
     })
   }
   return found
@@ -213,7 +213,7 @@ function main(): void {
   const provenance = process.argv.includes('--provenance')
   const packages = readWorkspace(root)
   const order = publishOrder(packages)
-  const byName = new Map(packages.map((entry) => [entry.name, entry]))
+  const byName = new Map(packages.map(entry => [entry.name, entry]))
 
   // ★ Resuming is a named starting point rather than a flag that says "try again": which packages already went out is a
   // fact the operator has and this script cannot discover without the registry.
@@ -234,17 +234,18 @@ function main(): void {
   }
   // Named, because "published 3 packages" leaves out the one that was skipped for being private, and a release that quietly
   // omitted a package is a release somebody has to reconstruct later.
-  const skipped = packages.filter((entry) => !entry.published).map((entry) => entry.name)
+  const skipped = packages.filter(entry => !entry.published).map(entry => entry.name)
   if (skipped.length > 0) {
     process.stdout.write(`not published (private): ${skipped.join(', ')}\n`)
   }
 }
 
 // Only when run as a program, so importing the ordering from a test does not publish anything.
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1]) {
   try {
     main()
-  } catch (error) {
+  }
+  catch (error) {
     if (error instanceof OrderError) {
       process.stderr.write(`publish: ${error.message}\n`)
       process.exit(1)

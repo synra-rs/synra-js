@@ -30,6 +30,7 @@
 
 import { existsSync, readdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -53,6 +54,5 @@ function main(): void {
 
   process.exit(1)
 }
-
 
 main()

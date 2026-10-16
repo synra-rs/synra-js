@@ -27,11 +27,11 @@
 // ★ `export type *` 而不是 `export *`：本包只有类型，用 `export *` 会让编译产物里有一个
 //   运行时的 re-export 语句，而它 re-export 的东西不存在。
 export type * from '@synra/client'
-export type * from '@synra/protocol'
-
 // 关键几个显式再导出一次，给 IDE 更好的跳转与补全：`export type *` 让符号可见，但显式列出会在
 // 悬停时直接给出定义处，而不是绕经两次 re-export。
 export type { SynraClient, SynraError, SynraErrorCode, SynraResponse, Unsubscribe } from '@synra/client'
+
+export type * from '@synra/protocol'
 
 export type {
   DeviceId,

@@ -142,7 +142,7 @@ try {
     console.log('  · doc-snippets: the complete authoring example in 23 §8 compiles')
   }
   catch (error) {
-    const output = (error as { stdout?: string, stderr?: string })
+    const output = error as { stdout?: string, stderr?: string }
     console.error('✗ doc-snippets: the example in 23 §8 does not compile:')
     console.error(output.stdout ?? '')
     console.error(output.stderr ?? '')

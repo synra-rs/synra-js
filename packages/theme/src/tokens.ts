@@ -153,12 +153,12 @@ export const fontWeight = {
  * `rem` 语义还成立（跟随用户缩放与系统字号）。
  */
 export const fontSize = {
-  xs: ['12px', '1.5'],
-  sm: ['13px', '1.55'],
-  base: ['14px', '1.55'],
-  md: ['16px', '1.5'],
-  lg: ['20px', '1.35'],
-  xl: ['26px', '1.25'],
+  'xs': ['12px', '1.5'],
+  'sm': ['13px', '1.55'],
+  'base': ['14px', '1.55'],
+  'md': ['16px', '1.5'],
+  'lg': ['20px', '1.35'],
+  'xl': ['26px', '1.25'],
   '2xl': ['34px', '1.15'],
 } as const
 
@@ -172,10 +172,10 @@ export const fontSize = {
  * 尺寸"都落在某个设计过的档位上。
  */
 export const breakpoints = {
-  sm: '640px',
-  md: '768px',
-  lg: '1024px',
-  xl: '1280px',
+  'sm': '640px',
+  'md': '768px',
+  'lg': '1024px',
+  'xl': '1280px',
   '2xl': '1536px',
 } as const
 

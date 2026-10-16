@@ -22,6 +22,7 @@
 
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -41,8 +42,8 @@ function main(): void {
     const dist = join(source, 'dist')
     if (!existsSync(dist)) {
       console.error(
-        `✗ ${name} has no dist. Run \`pnpm run build\` first: the consumer check reads the built\n` +
-          '  declarations, and checking the sources instead would not prove they ship.',
+        `✗ ${name} has no dist. Run \`pnpm run build\` first: the consumer check reads the built\n`
+        + '  declarations, and checking the sources instead would not prove they ship.',
       )
       process.exit(1)
     }
@@ -56,13 +57,13 @@ function main(): void {
 
     // A type-only package must have no runtime entry. Asserted here as well as in `check-shapes.ts`
     // because this is the script that decides whether the check can run at all.
-    if (manifest.exports?.['.']?.['import'] !== undefined) {
+    if (manifest.exports?.['.']?.import !== undefined) {
       console.error(`✗ ${manifest.name} declares a runtime entry and is supposed to be types only`)
       process.exit(1)
     }
 
-    const directory =
-      manifest.name.startsWith('@')
+    const directory
+      = manifest.name.startsWith('@')
         ? join(target, ...manifest.name.split('/'))
         : join(target, manifest.name)
     mkdirSync(directory, { recursive: true })

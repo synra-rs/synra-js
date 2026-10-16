@@ -8,9 +8,10 @@
  * from disk fails when the ordering stops matching reality, rather than when somebody remembers to update a fixture.
  */
 
-import { describe, expect, it } from 'vitest'
+import type { PackageInfo } from './publish'
 
-import { OrderError, fromArgument, publishOrder, readWorkspace, resumeFrom, type PackageInfo } from './publish'
+import { describe, expect, it } from 'vitest'
+import { fromArgument, OrderError, publishOrder, readWorkspace, resumeFrom } from './publish'
 
 /** A package, with the fields the ordering does not use filled in. */
 function pkg(name: string, dependsOn: string[] = [], published = true): PackageInfo {
@@ -64,7 +65,8 @@ describe('publishOrder', () => {
     expect(() => publishOrder(packages)).toThrow(OrderError)
     try {
       publishOrder(packages)
-    } catch (error) {
+    }
+    catch (error) {
       // And the message names the loop, so the operator knows which two files to look at.
       expect((error as OrderError).message).toContain('@synra/a')
       expect((error as OrderError).message).toContain('@synra/b')
@@ -94,7 +96,7 @@ describe('publishOrder', () => {
 
   it('puts the real workspace in an order its own manifests allow', () => {
     // ★ The graph the release actually walks, read from disk rather than described here.
-    const packages = readWorkspace(new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'))
+    const packages = readWorkspace(new URL('..', import.meta.url).pathname.replace(/^\/([A-Z]:)/i, '$1'))
     expect(packages.length).toBeGreaterThan(0)
 
     const order = publishOrder(packages)

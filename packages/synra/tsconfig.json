@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
-    "emitDeclarationOnly": true
+    "rootDir": "src",
+    "emitDeclarationOnly": true,
+    "outDir": "dist"
   },
-  "include": ["src"],
-  "references": [{ "path": "../protocol" }, { "path": "../client" }]
+  "references": [{ "path": "../protocol" }, { "path": "../client" }],
+  "include": ["src"]
 }

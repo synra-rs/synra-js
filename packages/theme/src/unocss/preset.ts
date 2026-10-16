@@ -16,12 +16,12 @@
  * 官网还是会拿到一份 reset，而它的排版会被打散。这是"官网能当消费者"的前提。
  */
 
-import { presetWind3 } from 'unocss'
 import type { Preset } from 'unocss'
-
-import { breakpoints, colors, duration, ease, fontFamily, fontSize, glow, radius, zIndex } from '../tokens.js'
-import { css } from '../css.js'
 import type { PreflightTier } from '../css.js'
+
+import { presetWind3 } from 'unocss'
+import { css } from '../css.js'
+import { breakpoints, colors, duration, ease, fontFamily, fontSize, glow, radius, zIndex } from '../tokens.js'
 import { structuralShortcuts } from './shortcuts.js'
 
 /** `presetSynra` 的选项。 */
