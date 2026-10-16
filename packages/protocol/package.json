@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "description": "Synra wire protocol types. Generated from the Rust kernel; do not edit by hand.",
   "license": "MIT",
+  "homepage": "https://github.com/synra-rs/synra-js#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synra-rs/synra-js.git",
+    "directory": "packages/protocol"
+  },
+  "bugs": {
+    "url": "https://github.com/synra-rs/synra-js/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "files": ["dist"],
