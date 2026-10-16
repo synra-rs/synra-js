@@ -2,6 +2,15 @@
   "name": "synra-js",
   "version": "0.0.8",
   "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/synra-rs/synra-js#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synra-rs/synra-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/synra-rs/synra-js/issues"
+  },
   "type": "module",
   "packageManager": "pnpm@11.15.1",
   "engines": {
