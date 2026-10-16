@@ -13,7 +13,7 @@
  * 一次什么都没查的绿色运行，与一次真的对上了的绿色运行，在输出里长得一样。
  * 所以缺标签是一个问题，而不是"跳过"。
  *
- * 用法：`GITHUB_REF_NAME=v0.1.0 pnpm run check:release-tag`（CI 里这个变量由 Actions 给）。
+ * 用法：`GITHUB_REF_NAME=v0.0.0 pnpm run check:release-tag`（CI 里这个变量由 Actions 给）。
  */
 
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
@@ -36,7 +36,7 @@ export function releaseTagProblems(tag: string, packages: readonly PackageVersio
   const problems: string[] = []
 
   if (tag === '') {
-    problems.push('GITHUB_REF_NAME 没有设置或为空，所以没有标签可以对照。本机跑要显式给一个，例如 GITHUB_REF_NAME=v0.1.0')
+    problems.push('GITHUB_REF_NAME 没有设置或为空，所以没有标签可以对照。本机跑要显式给一个，例如 GITHUB_REF_NAME=v0.0.0')
     return problems
   }
 
