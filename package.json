@@ -2,6 +2,7 @@
   "name": "synra-js",
   "version": "0.0.8",
   "private": true,
+  "author": "imba97",
   "license": "MIT",
   "homepage": "https://github.com/synra-rs/synra-js#readme",
   "repository": {
