@@ -68,8 +68,8 @@ export interface SynraTheme {
   readonly breakpoints: Record<string, string>
   readonly borderRadius: Record<string, string>
   readonly zIndex: Record<string, number>
-  readonly transitionDuration: Record<string, string>
-  readonly transitionTimingFunction: Record<string, string>
+  readonly duration: Record<string, string>
+  readonly easing: Record<string, string>
   readonly blur: Record<string, string>
   readonly boxShadow: Record<string, string>
 }
@@ -91,12 +91,20 @@ export function synraTheme(): SynraTheme {
       Object.entries(radius).map(([key]) => [kebab(key), `var(--synra-radius-${kebab(key)})`]),
     ),
     zIndex,
-    transitionDuration: {
-      fast: duration.fast,
-      base: duration.base,
-      slow: duration.slow,
+    // ★ **这两个键名是量出来的，不是猜的**：`@unocss/preset-mini@66` 的规则里
+    //   `duration-<key>` 读 `theme.duration[key]`、`ease-<key>` 读 `theme.easing[key]`，
+    //   而 `transition-*` 用的是 `theme.duration.DEFAULT` / `theme.easing.DEFAULT`。
+    //
+    //   它们原来叫 `transitionDuration` / `transitionTimingFunction` —— 那是**听起来对但 UnoCSS 不读**的名字，
+    //   后果是 `duration-base` 与 `ease-standard` **静默不生成**（UnoCSS 对不认识的类不报错），
+    //   于是 R30"时长与缓动来自 token"会退化成每个组件自己写字面 `150ms`。
+    //   发现方式：宿主接入时逐个类名生成 CSS 核对，这两个是仅有的缺失项。
+    duration: {
+      DEFAULT: duration.base,
+      ...duration,
     },
-    transitionTimingFunction: {
+    easing: {
+      DEFAULT: ease.standard,
       standard: ease.standard,
     },
     blur: {
