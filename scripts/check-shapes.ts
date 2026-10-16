@@ -779,6 +779,74 @@ function importsUnocss(source: string): boolean {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 12 · 每个声明的入口都真的存在
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// ★ **这一条是"发布之后才会发现"的守门的定价**。`@synra/testkit` 的 `main` / `module` /
+//   `exports.import` 三处都写着 `./dist/index.mjs`，而 `tsc -b` 产出的是 `dist/index.js` ——
+//   于是它的运行期入口指向一个**不存在的文件**。
+//
+//   为什么没有任何东西发现它：`types` 是对的，所以**类型检查全绿**；而这个包不在
+//   `scripts/link-dist.ts` 的名单里（那份名单只给"纯类型包"铺安装布局）。失败落在
+//   使用者的第一次 `import`，而那已经是我们发出去之后了。
+//
+//   判据是"声明的路径必须存在"，不是"扩展名必须是什么" —— 后者会把 `.mjs` / `.cjs` 这类
+//   合法的选择也判成错。
+
+{
+  const publishable = ['client', 'protocol', 'synra', 'testkit', 'theme'] as const
+  const missing: string[] = []
+  let checked = 0
+
+  for (const name of publishable) {
+    const directory = join(jsRoot, 'packages', name)
+    // 没有构建产物时跳过（并在下面说明）：`check` 会先跑 `tsc -b`，所以正常路径下 dist 都在。
+    if (!existsSync(join(directory, 'dist'))) {
+      continue
+    }
+    checked += 1
+
+    const manifest = JSON.parse(read(join(directory, 'package.json'))) as {
+      readonly name?: string
+      readonly main?: string
+      readonly module?: string
+      readonly types?: string
+      readonly exports?: Record<string, string | Record<string, string>>
+    }
+
+    const declared: string[] = []
+    for (const field of [manifest.main, manifest.module, manifest.types]) {
+      if (field !== undefined) {
+        declared.push(field)
+      }
+    }
+    for (const entry of Object.values(manifest.exports ?? {})) {
+      if (typeof entry === 'string') {
+        declared.push(entry)
+        continue
+      }
+      for (const path of Object.values(entry)) {
+        declared.push(path)
+      }
+    }
+
+    for (const path of declared) {
+      if (!existsSync(join(directory, path))) {
+        missing.push(`${manifest.name ?? name} 的 ${path}`)
+      }
+    }
+  }
+
+  if (missing.length > 0) {
+    fail(
+      'entry-paths',
+      `这些声明的入口文件不存在（消费者第一次 import 时才会发现）：${missing.join('、')}`,
+    )
+  }
+  evidence.push(`每个声明的入口都指向真实文件（查了 ${String(checked)} 个包）`)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 if (problems.length > 0) {
   console.error(`\n✗ shape check failed with ${String(problems.length)} problem(s):\n`)
