@@ -27,8 +27,9 @@
  * 跑几轮才能发现所有问题是最浪费的。
  */
 
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -60,9 +61,9 @@ export function kernelCandidates(root: string, coreRoot: string | undefined): st
 }
 
 /** 本次运行实际用的内核目录；一个都找不到时给一个用于报错的路径。 */
-const kernelRoot =
-  kernelCandidates(jsRoot, process.env.SYNRA_CORE_ROOT).find((candidate) => existsSync(candidate))
-  ?? join(jsRoot, '..', KERNEL_DIRECTORY)
+const kernelRoot
+  = kernelCandidates(jsRoot, process.env.SYNRA_CORE_ROOT).find(candidate => existsSync(candidate))
+    ?? join(jsRoot, '..', KERNEL_DIRECTORY)
 
 const PROTOCOL_CRATE = join(kernelRoot, 'crates', 'synra-protocol', 'src')
 const DTO_CRATE = join(kernelRoot, 'crates', 'synra-ipc', 'src', 'dto')
@@ -134,7 +135,8 @@ const RUST_CONVENTIONS: Record<string, string | null> = {
  */
 export function rustConvention(source: string, typeName: string): string | null {
   const declaration = new RegExp(`pub (?:struct|enum) ${typeName}\\b`).exec(source)
-  if (declaration === null) return null
+  if (declaration === null)
+    return null
   const before = source.slice(Math.max(0, declaration.index - 4_000), declaration.index)
   const matches = [...before.matchAll(/#\[serde\([^)]*rename_all = "([a-zA-Z_-]+)"/g)]
   // ★ A convention belongs to this type only if no other type is declared between it and this one.
@@ -160,10 +162,11 @@ export function rustConvention(source: string, typeName: string): string | null 
 /** TS 侧 `ErrorCode` 的取值。 */
 export function tsErrorCodes(wire: string): string[] {
   const start = wire.indexOf('export type ErrorCode =')
-  if (start < 0) return []
+  if (start < 0)
+    return []
   const end = wire.indexOf('\n\n', start)
   const block = wire.slice(start, end < 0 ? undefined : end)
-  return [...block.matchAll(/'([a-z_]+)'/g)].flatMap((match) =>
+  return [...block.matchAll(/'([a-z_]+)'/g)].flatMap(match =>
     match[1] === undefined ? [] : [match[1]],
   )
 }
@@ -172,11 +175,12 @@ export function tsErrorCodes(wire: string): string[] {
 export function rustErrorCodes(source: string): string[] {
   const declaration = /pub enum ErrorCode\s*\{([\s\S]*?)\n\}/.exec(source)
   const body = declaration?.[1]
-  if (body === undefined) return []
-  const names = [...body.matchAll(/^\s{4}([A-Z][A-Za-z0-9]*),/gm)].flatMap((match) =>
+  if (body === undefined)
+    return []
+  const names = [...body.matchAll(/^\s{4}([A-Z][A-Za-z0-9]*),/gm)].flatMap(match =>
     match[1] === undefined ? [] : [match[1]],
   )
-  return names.map((name) =>
+  return names.map(name =>
     name
       .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
       .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
@@ -195,7 +199,8 @@ export function evaluateProduct(expression: string): number {
   let total = 1
   for (const factor of expression.split('*')) {
     const digits = factor.trim()
-    if (!/^[0-9]+$/.test(digits)) return Number.NaN
+    if (!/^\d+$/.test(digits))
+      return Number.NaN
     total *= Number.parseInt(digits, 10)
   }
   return total
@@ -205,12 +210,12 @@ const wirePath = join(jsRoot, 'packages', 'protocol', 'src', 'generated', 'wire.
 const wire = read(wirePath)
 
 const rustFiles = existsSync(PROTOCOL_CRATE)
-  ? readdirSync(PROTOCOL_CRATE).filter((name) => name.endsWith('.rs'))
+  ? readdirSync(PROTOCOL_CRATE).filter(name => name.endsWith('.rs'))
   : []
 
-const rustSource =
-  rustFiles.length > 0
-    ? rustFiles.map((name) => read(join(PROTOCOL_CRATE, name))).join('\n')
+const rustSource
+  = rustFiles.length > 0
+    ? rustFiles.map(name => read(join(PROTOCOL_CRATE, name))).join('\n')
     : null
 
 if (rustSource === null) {
@@ -232,7 +237,8 @@ if (rustSource === null) {
 if (rustSource !== null) {
   let checked = 0
   for (const [typeName, expected] of Object.entries(RUST_CONVENTIONS)) {
-    if (expected === null) continue
+    if (expected === null)
+      continue
     checked += 1
     const actual = rustConvention(rustSource, typeName)
     if (actual === null) {
@@ -256,9 +262,11 @@ if (rustSource !== null) {
 
   if (expected.length === 0) {
     fail('rust', 'ErrorCode has no variants in the protocol crate')
-  } else {
+  }
+  else {
     for (const code of expected) {
-      if (!actual.includes(code)) fail('error-codes', `ErrorCode is missing ${code}`)
+      if (!actual.includes(code))
+        fail('error-codes', `ErrorCode is missing ${code}`)
     }
     for (const code of actual) {
       if (!expected.includes(code)) {
@@ -279,9 +287,10 @@ if (rustSource !== null) {
   const body = declaration?.[1]
   if (body === undefined) {
     fail('rust', 'FrameKind was not found in frame.rs')
-  } else {
+  }
+  else {
     const rustKinds = [...body.matchAll(/^\s{4}([A-Z][A-Za-z0-9]*) = (0x[0-9a-fA-F]+),/gm)].map(
-      (match) => ({ name: match[1] ?? '', value: Number.parseInt(match[2] ?? '0', 16) }),
+      match => ({ name: match[1] ?? '', value: Number.parseInt(match[2] ?? '0', 16) }),
     )
     for (const kind of rustKinds) {
       const inTs = new RegExp(`${kind.name}: (0x[0-9a-fA-F]+)`).exec(wire)
@@ -339,7 +348,8 @@ if (rustSource !== null) {
   const mdnsTs = /MDNS_SERVICE = '([^']+)'/.exec(wire)
   if (mdns?.[1] === undefined || mdnsTs?.[1] === undefined) {
     fail('constants', 'MDNS_SERVICE is missing from one of the two sides')
-  } else if (mdns[1] !== mdnsTs[1]) {
+  }
+  else if (mdns[1] !== mdnsTs[1]) {
     fail('constants', `MDNS_SERVICE is ${mdnsTs[1]} in TS and ${mdns[1]} in Rust`)
   }
   evidence.push(`${String(numeric.length + 1)} constants compared`)
@@ -472,8 +482,8 @@ if (rustSource !== null) {
     const unbacked = [...tsFields.keys()].filter(name => !rustFields.has(name))
     if (unbacked.length > 0) {
       evidence.push(
-        `dto-coverage: ${String(unbacked.length)} 个 TS interface 没有同名 Rust struct（界面侧的组合类型）：`
-        + unbacked.join(', '),
+        `dto-coverage: ${String(unbacked.length)} 个 TS interface 没有同名 Rust struct（界面侧的组合类型）：${
+          unbacked.join(', ')}`,
       )
     }
 
@@ -503,7 +513,7 @@ if (rustSource !== null) {
       readonly module?: string
     }
     const entry = manifest.exports?.['.'] ?? {}
-    if (entry['import'] !== undefined || entry['require'] !== undefined) {
+    if (entry.import !== undefined || entry.require !== undefined) {
       fail(
         `packages/${name}`,
         'a type-only package must not declare a runtime entry point in `exports`',
@@ -515,7 +525,7 @@ if (rustSource !== null) {
         'a type-only package must not declare `main` or `module`: those resolve to a .js that does not exist',
       )
     }
-    if (entry['types'] === undefined) {
+    if (entry.types === undefined) {
       // ★ 这句话原先写反了。条件问的是"`types` **缺了**吗"，而消息说的是
       //   "一个纯类型包**不得**声明 `exports["."].types`" —— 两者意思相反。
       //   一份失败信息如果把人指向"删掉这个字段"，而真正该做的是"加上它"，
@@ -543,7 +553,7 @@ if (rustSource !== null) {
     if (existsSync(dist)) {
       const stray = readdirSync(dist, { recursive: true })
         .map(String)
-        .filter((entry_) => entry_.endsWith('.js') || entry_.endsWith('.mjs'))
+        .filter(entry_ => entry_.endsWith('.js') || entry_.endsWith('.mjs'))
       if (stray.length > 0) {
         fail(
           `packages/${name}/dist`,
@@ -554,11 +564,11 @@ if (rustSource !== null) {
       const entryFile = join(dist, 'index.d.ts')
       if (existsSync(entryFile)) {
         const valueExports = [...read(entryFile).matchAll(/^export\s*\{([^}]*)\}/gm)].flatMap(
-          (match) =>
+          match =>
             (match[1] ?? '')
               .split(',')
-              .map((part) => part.trim())
-              .filter((part) => part.length > 0),
+              .map(part => part.trim())
+              .filter(part => part.length > 0),
         )
         if (valueExports.length > 0) {
           fail(
@@ -584,7 +594,7 @@ if (rustSource !== null) {
   if (!/^\s*import\s+['"]\.\/global['"]/m.test(clientIndex)) {
     fail(
       'packages/client',
-      "index.ts does not `import './global'`, so `types: [\"@synra/client\"]` would not pull in the global declarations",
+      'index.ts does not `import \'./global\'`, so `types: ["@synra/client"]` would not pull in the global declarations',
     )
   }
 
@@ -611,9 +621,11 @@ if (rustSource !== null) {
     join(jsRoot, 'packages', 'client', 'src'),
     join(jsRoot, 'packages', 'synra', 'src'),
   ]) {
-    if (!existsSync(directory)) continue
+    if (!existsSync(directory))
+      continue
     for (const file of readdirSync(directory)) {
-      if (!file.endsWith('.ts')) continue
+      if (!file.endsWith('.ts'))
+        continue
       declarations += [...read(join(directory, file)).matchAll(/export interface SynraResponse\b/g)]
         .length
     }
@@ -651,12 +663,12 @@ if (rustSource !== null) {
     }
     return { name, version: manifest.version ?? '(no version)' }
   })
-  const distinct = new Set(versions.map((entry) => entry.version))
+  const distinct = new Set(versions.map(entry => entry.version))
   if (distinct.size > 1) {
     fail(
       'version-sync',
       `the publishable packages disagree on a version: ${versions
-        .map((entry) => `${entry.name}@${entry.version}`)
+        .map(entry => `${entry.name}@${entry.version}`)
         .join(', ')}`,
     )
   }

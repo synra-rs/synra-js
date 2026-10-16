@@ -12,17 +12,17 @@
   // Which means it runs **after** a build. `pnpm run check` orders it that way.
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true,
     "composite": false,
-    "declaration": false,
-    "declarationMap": false,
-    "sourceMap": false,
-    "types": ["@synra/client"],
-    "typeRoots": ["./node_modules/@types", "./node_modules"],
     "baseUrl": ".",
     "paths": {
       "@synra/protocol": ["../../protocol/dist/index.d.ts"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types", "./node_modules"],
+    "types": ["@synra/client"],
+    "declaration": false,
+    "declarationMap": false,
+    "noEmit": true,
+    "sourceMap": false
   },
   "include": ["."]
 }

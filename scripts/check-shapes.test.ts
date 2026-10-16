@@ -84,11 +84,11 @@ describe('rustErrorCodes', () => {
 describe('tsErrorCodes', () => {
   const wire = [
     'export type ErrorCode =',
-    "  | 'device_offline'",
-    "  | 'tls_handshake_failed'",
+    '  | \'device_offline\'',
+    '  | \'tls_handshake_failed\'',
     '',
     'export type Other =',
-    "  | 'not_an_error_code'",
+    '  | \'not_an_error_code\'',
   ].join('\n')
 
   it('reads the union and stops at the blank line', () => {

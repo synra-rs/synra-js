@@ -8,7 +8,7 @@
 import type { SynraError, TransferProgress } from '@synra/client'
 import { describe, expect, it, vi } from 'vitest'
 
-import { MockSynraClient, createMockClient, matches, synraError } from '../src/index'
+import { createMockClient, matches, MockSynraClient, synraError } from '../src/index'
 
 /** 断言一个 promise 以一个特定错误码拒绝。 */
 async function expectCode(
@@ -17,7 +17,8 @@ async function expectCode(
 ): Promise<SynraError> {
   try {
     await operation
-  } catch (error) {
+  }
+  catch (error) {
     const typed = error as SynraError
     expect(typed.code).toBe(code)
     return typed
@@ -78,7 +79,7 @@ describe('capability gating', () => {
     // A plugin that sends to an offline device should be able to find that out before trying.
     const synra = createMockClient({ capabilities: ['device:list'], devices })
     const listed = await synra.device.list()
-    expect(listed.map((device) => device.deviceId)).toEqual(['dev_a'])
+    expect(listed.map(device => device.deviceId)).toEqual(['dev_a'])
   })
 
   it('covers a qualified capability with a wildcard grant', async () => {
@@ -117,7 +118,7 @@ describe('capability gating', () => {
     // A test that asserts a call was refused should not have to catch the error first.
     const synra = createMockClient({ capabilities: [] })
     await synra.device.list().catch(() => undefined)
-    const refused = synra.calls.find((call) => call.ns === 'device' && call.method === 'list')
+    const refused = synra.calls.find(call => call.ns === 'device' && call.method === 'list')
     expect(refused?.refused?.code).toBe('capability_denied')
   })
 })
@@ -510,7 +511,7 @@ describe('logging', () => {
     synra.log.info('i')
     synra.log.warn('w')
     synra.log.error('e')
-    expect(synra.calls.filter((call) => call.ns === 'log')).toHaveLength(5)
+    expect(synra.calls.filter(call => call.ns === 'log')).toHaveLength(5)
   })
 
   it('prefixes a child logger onto the message', () => {
@@ -596,7 +597,7 @@ describe('an author can run a plugin without a host', () => {
 
     expect(synra.callCount('device', 'send')).toBe(1)
     expect(synra.lastArgs('storage', 'set')).toEqual(['last-target', 'dev_a'])
-    expect(synra.calls.map((call) => `${call.ns}.${call.method}`)).toEqual([
+    expect(synra.calls.map(call => `${call.ns}.${call.method}`)).toEqual([
       'device.list',
       'device.send',
       'storage.set',

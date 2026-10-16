@@ -17,13 +17,13 @@
  * `structuralShortcuts` 都是单独导出的。
  */
 
+export { synraBlocklist } from './blocklist.js'
+export type { Blocklist } from './blocklist.js'
+
 export { synraConfig } from './config.js'
 export type { SynraConfigOptions } from './config.js'
 
 export { presetSynra, synraTheme, synraThemeColors } from './preset.js'
 export type { SynraPresetOptions } from './preset.js'
-
-export { synraBlocklist } from './blocklist.js'
-export type { Blocklist } from './blocklist.js'
 
 export { structuralShortcuts } from './shortcuts.js'

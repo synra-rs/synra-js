@@ -17,36 +17,12 @@
  */
 
 export type {
-  // 身份
-  DeviceId,
-  PluginId,
-  IntentId,
-  TransferId,
-  RequestId,
-  EventName,
-  TraceId,
-  // 错误
-  ErrorCode,
-  NetworkErrorCode,
-  SuggestedAction,
-  SynraError,
-  // 信封
-  Envelope,
-  // 会话
-  PlatformKind,
-  Platform,
-  PairRefusal,
-  IntentDisplay,
-  IntentInvocation,
-  IntentOutcome,
-  // 传输
-  TransferKind,
-  DigestAlgorithm,
-  TransferProgress,
-  TransferAbortReason,
-  // 发现
-  FrameKind,
-} from './generated/wire'
+  EventVerdict,
+  KernelEvent,
+  KernelEventEnvelope,
+  SequencedKernelEvent,
+  SequenceReport,
+} from './generated/events'
 
 // 宿主界面的形状与内核推给它的增量事件。与 `wire` 分开：那里是设备之间的协议，这里是内核与自己的
 // 界面之间。
@@ -67,12 +43,36 @@ export type {
 } from './generated/ui'
 
 export type {
-  EventVerdict,
-  KernelEvent,
-  KernelEventEnvelope,
-  SequenceReport,
-  SequencedKernelEvent,
-} from './generated/events'
+  // 身份
+  DeviceId,
+  DigestAlgorithm,
+  // 信封
+  Envelope,
+  // 错误
+  ErrorCode,
+  EventName,
+  // 发现
+  FrameKind,
+  IntentDisplay,
+  IntentId,
+  IntentInvocation,
+  IntentOutcome,
+  NetworkErrorCode,
+  PairRefusal,
+  Platform,
+  // 会话
+  PlatformKind,
+  PluginId,
+  RequestId,
+  SuggestedAction,
+  SynraError,
+  TraceId,
+  TransferAbortReason,
+  TransferId,
+  // 传输
+  TransferKind,
+  TransferProgress,
+} from './generated/wire'
 
 // ★ 这里原本导出的是**值**：`isDelta`、`MAX_COUNTED_GAP`、`SequenceTracker`、
 //   `FrameKind`、`FRAME_HEADER_LEN`、`MAX_FRAME_LEN`、`MAX_CHUNK_LEN`、`MAX_PAYLOAD_LEN`、

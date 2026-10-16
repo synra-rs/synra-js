@@ -8,10 +8,10 @@
  * 所以它们各有断言，而断言里的数字是**算出来的**，不是抄来的。
  */
 
-import { describe, expect, it } from 'vitest'
-
-import { colors, contrastPairs, cssVariables, glass, glow, tokensCss } from '../src/index.js'
 import type { ContrastPair } from '../src/index.js'
+
+import { describe, expect, it } from 'vitest'
+import { colors, contrastPairs, cssVariables, glass, glow, tokensCss } from '../src/index.js'
 import { contrast } from './contrast.js'
 
 /** 解析一个对比度端点：`glassBase` 指的是玻璃的**不透明基底**，不是一支颜色。 */

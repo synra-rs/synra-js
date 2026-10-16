@@ -92,7 +92,7 @@ type Outcome = SynraError | null
 export function synraError(
   code: ErrorCode,
   message: string,
-  extra?: { readonly retryable?: boolean; readonly traceId?: string; readonly actions?: readonly import('@synra/protocol').SuggestedAction[] },
+  extra?: { readonly retryable?: boolean, readonly traceId?: string, readonly actions?: readonly import('@synra/protocol').SuggestedAction[] },
 ): SynraError {
   return {
     code,
@@ -166,19 +166,20 @@ export class MockSynraClient implements SynraClient {
 
   /** 某次调用是否发生过。 */
   called(ns: string, method: string): boolean {
-    return this.calls.some((call) => call.ns === ns && call.method === method)
+    return this.calls.some(call => call.ns === ns && call.method === method)
   }
 
   /** 某个方法被调用了几次。 */
   callCount(ns: string, method: string): number {
-    return this.calls.filter((call) => call.ns === ns && call.method === method).length
+    return this.calls.filter(call => call.ns === ns && call.method === method).length
   }
 
   /** 最后一次调用某个方法的参数。 */
   lastArgs(ns: string, method: string): readonly unknown[] | undefined {
     for (let index = this.calls.length - 1; index >= 0; index -= 1) {
       const call = this.calls[index]
-      if (call && call.ns === ns && call.method === method) return call.args
+      if (call && call.ns === ns && call.method === method)
+        return call.args
     }
     return undefined
   }
@@ -201,9 +202,10 @@ export class MockSynraClient implements SynraClient {
   }
 
   /** 取一个 stub 的值。 */
-  private stubbed<T>(ns: string, method: string): { hit: true; value: T } | { hit: false } {
+  private stubbed<T>(ns: string, method: string): { hit: true, value: T } | { hit: false } {
     const key = `${ns}.${method}`
-    if (!this.stubs.has(key)) return { hit: false }
+    if (!this.stubs.has(key))
+      return { hit: false }
     return { hit: true, value: this.stubs.get(key) as T }
   }
 
@@ -289,7 +291,8 @@ export class MockSynraClient implements SynraClient {
   readonly event = {
     emit: async (event: string, payload?: unknown): Promise<void> => {
       const stub = this.stubbed<void>('event', 'emit')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.record('event', 'emit', [event, payload], null)
       void outcome
     },
@@ -311,11 +314,13 @@ export class MockSynraClient implements SynraClient {
   readonly device = {
     list: async (): Promise<DeviceTarget[]> => {
       const stub = this.stubbed<DeviceTarget[]>('device', 'list')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.gate('device:list')
       this.record('device', 'list', [], outcome)
-      if (outcome) throw outcome
-      return this.devices.filter((device) => device.online)
+      if (outcome)
+        throw outcome
+      return this.devices.filter(device => device.online)
     },
 
     send: async (req: {
@@ -324,18 +329,22 @@ export class MockSynraClient implements SynraClient {
       payload?: unknown
     }): Promise<void> => {
       const stub = this.stubbed<void>('device', 'send')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.gate(`device:send:${req.to}`)
       this.record('device', 'send', [req], outcome)
-      if (outcome) throw outcome
+      if (outcome)
+        throw outcome
     },
 
-    broadcast: async (req: { event: string; payload?: unknown }): Promise<void> => {
+    broadcast: async (req: { event: string, payload?: unknown }): Promise<void> => {
       const stub = this.stubbed<void>('device', 'broadcast')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.gate('device:broadcast')
       this.record('device', 'broadcast', [req], outcome)
-      if (outcome) throw outcome
+      if (outcome)
+        throw outcome
     },
 
     onChange: (handler: (devices: DeviceTarget[]) => void): Unsubscribe => {
@@ -360,9 +369,10 @@ export class MockSynraClient implements SynraClient {
         throw error
       }
       const stub = this.stubbed<DeviceId | null>('device', 'pick')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       this.record('device', 'pick', [options], null)
-      const first = this.devices.find((device) => device.online)
+      const first = this.devices.find(device => device.online)
       return first ? first.deviceId : null
     },
 
@@ -374,43 +384,52 @@ export class MockSynraClient implements SynraClient {
   readonly storage = {
     get: async <T = unknown>(key: string, defaults?: { fallback: T }): Promise<T | undefined> => {
       const stub = this.stubbed<T | undefined>('storage', 'get')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.gate('storage:local:read')
       this.record('storage', 'get', [key], outcome)
-      if (outcome) throw outcome
-      if (this.store.has(key)) return this.store.get(key) as T
+      if (outcome)
+        throw outcome
+      if (this.store.has(key))
+        return this.store.get(key) as T
       return defaults ? defaults.fallback : undefined
     },
 
     set: async <T = unknown>(key: string, value: T): Promise<void> => {
       const stub = this.stubbed<void>('storage', 'set')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.gate('storage:local:write')
       this.record('storage', 'set', [key, value], outcome)
-      if (outcome) throw outcome
+      if (outcome)
+        throw outcome
       this.store.set(key, value)
     },
 
     delete: async (key: string): Promise<void> => {
       const stub = this.stubbed<void>('storage', 'delete')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.gate('storage:local:write')
       this.record('storage', 'delete', [key], outcome)
-      if (outcome) throw outcome
+      if (outcome)
+        throw outcome
       this.store.delete(key)
     },
 
     keys: async (prefix?: string): Promise<string[]> => {
       const stub = this.stubbed<string[]>('storage', 'keys')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.gate('storage:local:read')
       this.record('storage', 'keys', [prefix], outcome)
-      if (outcome) throw outcome
+      if (outcome)
+        throw outcome
       const all = [...this.store.keys()]
-      return prefix === undefined ? all : all.filter((key) => key.startsWith(prefix))
+      return prefix === undefined ? all : all.filter(key => key.startsWith(prefix))
     },
 
-    quota: async (): Promise<{ usedBytes: number; maxBytes: number }> => {
+    quota: async (): Promise<{ usedBytes: number, maxBytes: number }> => {
       this.record('storage', 'quota', [], null)
       // 用 JSON 的长度估一下，够断言用。真配额由内核算，mock 不该假装能算准。
       const used = JSON.stringify([...this.store]).length
@@ -428,21 +447,23 @@ export class MockSynraClient implements SynraClient {
         throw error
       }
       const stub = this.stubbed<SynraResponse>('network', 'fetch')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
 
       const outcome = this.gate(`network:fetch:${hostOf(input)}`)
       this.record('network', 'fetch', [input, init], outcome)
-      if (outcome) throw outcome
+      if (outcome)
+        throw outcome
 
       // 一个空的响应，而不是一个假造的成功 —— mock 不该假装知道远端返回了什么。要断言内容时用
       // `stub('network', 'fetch', response)`。
       let consumed = false
-      const once = <T>(value: T) => (): Promise<T> => {
+      const once = <T>(value: T) => async (): Promise<T> => {
         if (consumed) {
           // The rejection reason is a structured `SynraError`, not an `Error`: the client's contract is
           // that failures carry a `code` a caller branches on, and wrapping it in an `Error` would put
-          // the code somewhere the author has to dig for.
-          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+          // the code somewhere the author has to dig for. The rule that would object is turned off once
+          // in `eslint.config.ts`, with this same reason.
           return Promise.reject(synraError('internal', 'the body has already been read'))
         }
         consumed = true
@@ -472,16 +493,19 @@ export class MockSynraClient implements SynraClient {
       contextId?: string
     }): Promise<TransferId> => {
       const stub = this.stubbed<TransferId>('transfer', 'send')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.gate(`file:transfer:send`)
       this.record('transfer', 'send', [req], outcome)
-      if (outcome) throw outcome
+      if (outcome)
+        throw outcome
       return `mock-transfer-${String((this.nextId += 1))}`
     },
 
     status: async (id: TransferId): Promise<TransferStatus> => {
       const stub = this.stubbed<TransferStatus>('transfer', 'status')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       this.record('transfer', 'status', [id], null)
       return { transferId: id, state: 'completed', receivedBytes: 0, totalBytes: 0 }
     },
@@ -507,18 +531,22 @@ export class MockSynraClient implements SynraClient {
   readonly platform = {
     openUrl: async (url: string): Promise<void> => {
       const stub = this.stubbed<void>('platform', 'openUrl')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.platformGate('platform:open-url', 'open_url')
       this.record('platform', 'openUrl', [url], outcome)
-      if (outcome) throw outcome
+      if (outcome)
+        throw outcome
     },
 
-    notify: async (req: { title: string; body: string }): Promise<void> => {
+    notify: async (req: { title: string, body: string }): Promise<void> => {
       const stub = this.stubbed<void>('platform', 'notify')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.platformGate('platform:notify', 'notify')
       this.record('platform', 'notify', [req], outcome)
-      if (outcome) throw outcome
+      if (outcome)
+        throw outcome
     },
   }
 
@@ -532,19 +560,23 @@ export class MockSynraClient implements SynraClient {
         throw error
       }
       const stub = this.stubbed<string>('clipboard', 'read')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.platformGate('platform:clipboard:read', 'clipboard_read')
       this.record('clipboard', 'read', [], outcome)
-      if (outcome) throw outcome
+      if (outcome)
+        throw outcome
       return ''
     },
 
     write: async (text: string): Promise<void> => {
       const stub = this.stubbed<void>('clipboard', 'write')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       const outcome = this.platformGate('platform:clipboard:write', 'clipboard_write')
       this.record('clipboard', 'write', [text], outcome)
-      if (outcome) throw outcome
+      if (outcome)
+        throw outcome
     },
   }
 
@@ -558,7 +590,8 @@ export class MockSynraClient implements SynraClient {
       args?: Args,
     ): Promise<Result> => {
       const stub = this.stubbed<Result>('self', 'invoke')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       this.record('self', 'invoke', [action, args], null)
       // 没有 stub 就丢一个错误，而不是返回 `undefined`：headless 部分在单测里不存在，返回
       // `undefined` 会让作者的代码把 `undefined` 当成一个结果继续跑。
@@ -570,7 +603,8 @@ export class MockSynraClient implements SynraClient {
 
     actions: async (): Promise<ActionDescriptor[]> => {
       const stub = this.stubbed<ActionDescriptor[]>('self', 'actions')
-      if (stub.hit) return stub.value
+      if (stub.hit)
+        return stub.value
       this.record('self', 'actions', [], null)
       return [...this.declaredActions]
     },
@@ -585,11 +619,11 @@ export class MockSynraClient implements SynraClient {
 
   isSynraError(value: unknown): value is SynraError {
     return (
-      typeof value === 'object' &&
-      value !== null &&
-      typeof (value as { code?: unknown }).code === 'string' &&
-      typeof (value as { message?: unknown }).message === 'string' &&
-      typeof (value as { retryable?: unknown }).retryable === 'boolean'
+      typeof value === 'object'
+      && value !== null
+      && typeof (value as { code?: unknown }).code === 'string'
+      && typeof (value as { message?: unknown }).message === 'string'
+      && typeof (value as { retryable?: unknown }).retryable === 'boolean'
     )
   }
 
@@ -632,13 +666,16 @@ export class MockSynraClient implements SynraClient {
 
   /** 能力闸门。返回 `null` 表示通过。 */
   private gate(capability: string): Outcome {
-    if (this.capabilities.has('*')) return null
-    if (this.capabilities.has(capability)) return null
+    if (this.capabilities.has('*'))
+      return null
+    if (this.capabilities.has(capability))
+      return null
     // 通配授权：`device:send:*` 覆盖 `device:send:peer-a`。
     const parts = capability.split(':')
     for (let take = parts.length - 1; take > 0; take -= 1) {
       const candidate = [...parts.slice(0, take), '*'].join(':')
-      if (this.capabilities.has(candidate)) return null
+      if (this.capabilities.has(candidate))
+        return null
     }
     return denied(capability)
   }
@@ -675,7 +712,7 @@ export function createMockClient(options: MockOptions = {}): MockSynraClient {
 
 /** 从一个 URL 里取出主机名，用于能力字符串。取不出来时返回一个不会是合法主机的值。 */
 function hostOf(url: string): string {
-  const match = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/([^/?#]+)/.exec(url)
+  const match = /^[a-z][a-z0-9+.-]*:\/\/([^/?#]+)/i.exec(url)
   return match?.[1] ?? '<unknown>'
 }
 
@@ -689,6 +726,7 @@ function hostOf(url: string): string {
 export function matches(pattern: string, name: string): boolean {
   const patternParts = pattern.split('.')
   const nameParts = name.split('.')
-  if (patternParts.length !== nameParts.length) return false
+  if (patternParts.length !== nameParts.length)
+    return false
   return patternParts.every((part, index) => part === '*' || part === nameParts[index])
 }

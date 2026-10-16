@@ -6,21 +6,22 @@
  * catch that regression, because the package's own build would still succeed.
  *
  * It is a `.ts` file rather than a `.d.ts` because the failures being guarded against are about
- * *using* the types: a declaration file that only names them would not exercise the surface.
+ * using* the types: a declaration file that only names them would not exercise the surface.
  */
 
 // ── 写法一：全局 synra，不用 import、不用判空 ────────────────────────────────
 
 export async function listDevices(): Promise<string[]> {
   const devices = await synra.device.list()
-  return devices.map((device) => device.deviceId)
+  return devices.map(device => device.deviceId)
 }
 
 // ── 写法二：window.synra 判空，用于可能在非插件环境跑的代码 ──────────────────
 
 export function requireSynra(): typeof synra {
   const client = window.synra
-  if (!client) throw new Error('this page has to run in a Synra plugin context')
+  if (!client)
+    throw new Error('this page has to run in a Synra plugin context')
   return client
 }
 
@@ -33,7 +34,7 @@ export async function sendIfAvailable(to: string): Promise<void> {
 export function watch(): Unsubscribe {
   // The handler receives a payload this example does not use; naming it `_payload` is how the
   // codebase says "deliberately unused" rather than discarding it with a `void` expression.
-  return synra.event.subscribe('_synra.device.changed', (_payload) => undefined)
+  return synra.event.subscribe('_synra.device.changed', _payload => undefined)
 }
 
 // ── 三种"能不能"是不同的方法，混用会编译失败 ───────────────────────────────
@@ -54,7 +55,8 @@ export function availability(): {
 // ── 未实现的方法仍然存在，且返回一个可处理的错误而不是 TypeError ─────────────
 
 export async function pickOrFallback(): Promise<string | null> {
-  if (!synra.device.supported.includes('device.pick')) return null
+  if (!synra.device.supported.includes('device.pick'))
+    return null
   return synra.device.pick({ title: 'Where?' })
 }
 
@@ -62,7 +64,8 @@ export async function pickOrFallback(): Promise<string | null> {
 
 export async function fetchTitle(url: string): Promise<string> {
   const response = await synra.network.fetch(url, { method: 'GET', timeoutMs: 5_000 })
-  if (!response.ok) return response.statusText
+  if (!response.ok)
+    return response.statusText
   return response.text()
 }
 
@@ -72,8 +75,10 @@ export function describeFailure(error: unknown): string {
   if (synra.isSynraError(error)) {
     // `code` is narrowed to the union, so a comparison against a code that does not exist is a
     // compile error rather than a branch that never runs.
-    if (error.code === 'capability_denied') return 'need permission'
-    if (error.retryable) return 'retry later'
+    if (error.code === 'capability_denied')
+      return 'need permission'
+    if (error.retryable)
+      return 'retry later'
     return error.message
   }
   return 'unknown'
