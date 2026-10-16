@@ -21,7 +21,7 @@ import type { PreflightTier } from '../css.js'
 
 import { presetWind3 } from 'unocss'
 import { css } from '../css.js'
-import { breakpoints, colors, duration, ease, fontFamily, fontSize, glow, radius, zIndex } from '../tokens.js'
+import { breakpoints, colors, duration, ease, fontFamily, fontSize, radius, zIndex } from '../tokens.js'
 import { structuralShortcuts } from './shortcuts.js'
 
 /** `presetSynra` 的选项。 */
@@ -113,7 +113,12 @@ export function synraTheme(): SynraTheme {
     },
     boxShadow: {
       // 发光是一个**状态**，不是皮肤：只允许出现在焦点环、那条线的活动态、主按钮按下态。
-      glow: `0 0 24px ${glow}`,
+      //
+      // ★ 这里原来写的是模板串 `${glow}` —— 也就是把 token 的**值**烘进生成的 CSS（产物里是 `#7c5cff73`）。
+      //   值当时是对的，所以没人会看出来；但那条规则是"字面颜色只允许出现在 §3 R8 的内联块里"，
+      //   而生成 CSS 里的一串十六进制正是它要消灭的东西（它也意味着以后改 token 必须重新构建才能生效）。
+      //   改成变量之后，产物里读得到 `var(--synra-glow)`，与 `blur` 那条（`var(--synra-blur)`）一致。
+      glow: `0 0 24px var(--synra-glow)`,
     },
   }
 }
