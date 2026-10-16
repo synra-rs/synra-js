@@ -2,6 +2,6 @@ packages:
   - packages/*
 
 # esbuild ships a native binary built by a postinstall script. Allowing it is required for
-# `tsx` and `vitest`; nothing else in this workspace runs build scripts.
+# `esno` (which runs `scripts/**`) and `vitest`; nothing else in this workspace runs build scripts.
 onlyBuiltDependencies:
   - esbuild
