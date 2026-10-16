@@ -1,7 +1,7 @@
 {
   "name": "synra",
   "type": "module",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "The aggregate type surface for Synra plugin authors. Zero runtime; usually resolved transitively.",
   "author": "imba97",
   "license": "MIT",
