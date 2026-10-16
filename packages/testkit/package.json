@@ -18,12 +18,12 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.js"
     }
   },
   "types": "./dist/index.d.ts",
-  "module": "./dist/index.mjs",
-  "main": "./dist/index.mjs",
+  "module": "./dist/index.js",
+  "main": "./dist/index.js",
   "publishConfig": {
     "access": "public"
   },
