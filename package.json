@@ -1,7 +1,7 @@
 {
   "name": "synra-js",
   "type": "module",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "private": true,
   "packageManager": "pnpm@11.15.1",
   "author": "imba97",

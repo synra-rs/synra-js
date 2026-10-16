@@ -1,7 +1,7 @@
 {
   "name": "@synra/protocol",
   "type": "module",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Synra wire protocol types. Generated from the Rust kernel; do not edit by hand.",
   "author": "imba97",
   "license": "MIT",
