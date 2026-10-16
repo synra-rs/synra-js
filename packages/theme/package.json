@@ -2,7 +2,7 @@
   "name": "@synra/theme",
   "type": "module",
   "version": "0.0.8",
-  "description": "The Synra design tokens, and the adapters that carry them into UnoCSS, VitePress and plain CSS.",
+  "description": "The Synra design tokens, and the adapters that carry them into UnoCSS, ant-design-vue, VitePress and plain CSS.",
   "author": "imba97",
   "license": "MIT",
   "homepage": "https://github.com/synra-rs/synra-js#readme",
@@ -19,6 +19,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./antd": {
+      "types": "./dist/antd/index.d.ts",
+      "import": "./dist/antd/index.js"
     },
     "./css": {
       "types": "./dist/css.d.ts",
@@ -37,7 +41,10 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["!dist/.tsbuildinfo", "dist"],
+  "files": [
+    "!dist/.tsbuildinfo",
+    "dist"
+  ],
   "engines": {
     "node": ">=20.19"
   },
@@ -49,14 +56,19 @@
     "test": "vitest run"
   },
   "peerDependencies": {
+    "ant-design-vue": "^4.0.0",
     "unocss": "^66.11.0"
   },
   "peerDependenciesMeta": {
+    "ant-design-vue": {
+      "optional": true
+    },
     "unocss": {
       "optional": true
     }
   },
   "devDependencies": {
+    "ant-design-vue": "4.2.6",
     "typescript": "^5.7.0",
     "unocss": "^66.11.0",
     "vitest": "^3.0.0"
