@@ -29,6 +29,7 @@
  * 让人以为"跑一下就重新生成过了"比让它明确地说"这里没有生成器"要糟。
  */
 
+import { existsSync, readdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
