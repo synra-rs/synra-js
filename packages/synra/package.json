@@ -1,6 +1,6 @@
 {
   "name": "synra",
-  "version": "0.0.0",
+  "version": "0.0.8",
   "description": "The aggregate type surface for Synra plugin authors. Zero runtime; usually resolved transitively.",
   "license": "MIT",
   "homepage": "https://github.com/synra-rs/synra-js#readme",

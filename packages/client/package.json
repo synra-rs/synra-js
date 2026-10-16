@@ -1,6 +1,6 @@
 {
   "name": "@synra/client",
-  "version": "0.0.0",
+  "version": "0.0.8",
   "description": "Types for the Synra client object a plugin's UI is given. Zero runtime.",
   "license": "MIT",
   "homepage": "https://github.com/synra-rs/synra-js#readme",
