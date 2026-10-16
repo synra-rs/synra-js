@@ -10,7 +10,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { OrderError, publishOrder, readWorkspace, type PackageInfo } from './publish'
+import { OrderError, fromArgument, publishOrder, readWorkspace, resumeFrom, type PackageInfo } from './publish'
 
 /** A package, with the fields the ordering does not use filled in. */
 function pkg(name: string, dependsOn: string[] = [], published = true): PackageInfo {
@@ -109,5 +109,68 @@ describe('publishOrder', () => {
     // the one package with a runtime — so "it is excluded" is not the property to check; its **position** is.
     expect(order).toContain('@synra/testkit')
     expect(order.at(-1)).toBe('@synra/testkit')
+  })
+})
+
+describe('resumeFrom', () => {
+  const order = ['@synra/protocol', 'synra', '@synra/client']
+
+  it('keeps the named package and everything after it', () => {
+    expect(resumeFrom(order, 'synra')).toEqual(['synra', '@synra/client'])
+  })
+
+  it('resuming from the first package is the whole order', () => {
+    expect(resumeFrom(order, '@synra/protocol')).toEqual(order)
+  })
+
+  // ★ The control, and the one that matters. The dangerous reading of an unknown name is "nothing matched, so publish
+  // everything" — a full re-publish at the moment the operator believes they are resuming, against a registry that
+  // cannot withdraw a version.
+  it('refuses a name that is not in the order rather than publishing everything', () => {
+    expect(() => resumeFrom(order, '@synra/typo')).toThrow(OrderError)
+    expect(() => resumeFrom(order, '@synra/typo')).toThrow(/not in the publish order/)
+  })
+
+  it('refuses an empty order, which has no place to resume from', () => {
+    expect(() => resumeFrom([], 'synra')).toThrow(OrderError)
+  })
+
+  // A private package never reaches the registry, so it cannot be a point a release resumes from — and it is the case a
+  // name-based lookup would otherwise find in the workspace and accept.
+  it('refuses a package that is in the workspace but private', () => {
+    const packages = [pkg('@synra/protocol'), pkg('@synra/private', [], false), pkg('@synra/client', ['@synra/protocol'])]
+    const real = publishOrder(packages)
+
+    expect(real).not.toContain('@synra/private')
+    expect(() => resumeFrom(real, '@synra/private')).toThrow(OrderError)
+  })
+
+  it('accepts every name the real workspace order contains', () => {
+    // A resume point the operator reads off a rehearsal has to work, so each of them is checked rather than assumed.
+    const order = publishOrder(readWorkspace(process.cwd()))
+
+    expect(order.length).toBeGreaterThan(0)
+    for (const name of order) {
+      expect(resumeFrom(order, name)).toEqual(order.slice(order.indexOf(name)))
+    }
+  })
+})
+
+describe('fromArgument', () => {
+  it('reads the name after the flag', () => {
+    expect(fromArgument(['node', 'publish.ts', '--publish', '--from', 'synra'])).toBe('synra')
+  })
+
+  it('is undefined when the flag was not given, which means the whole order', () => {
+    expect(fromArgument(['node', 'publish.ts', '--publish'])).toBeUndefined()
+  })
+
+  // The same trap as an unknown name, one step earlier: a bare `--from` must not mean "start at the beginning".
+  it('refuses a flag with no value', () => {
+    expect(() => fromArgument(['node', 'publish.ts', '--from'])).toThrow(OrderError)
+  })
+
+  it('refuses a value that is another flag', () => {
+    expect(() => fromArgument(['node', 'publish.ts', '--from', '--publish'])).toThrow(OrderError)
   })
 })

@@ -152,6 +152,50 @@ function publish(root: string, entry: PackageInfo, execute: boolean): void {
   execFileSync('pnpm', args, { cwd: root, stdio: 'inherit' })
 }
 
+/**
+ * The tail of an order, starting at a named package.
+ *
+ * # Why this exists
+ *
+ * A publish that stops half way leaves versions on the registry that **cannot be withdrawn**, and re-running from the top
+ * would try to publish them again. `--from` is the operator's answer to that: "these went out, start at this one".
+ *
+ * ★ **Why an unknown name is an error rather than a no-op.**
+ *
+ * The dangerous reading of `--from @synra/typo` is "no such package, so publish everything" — which re-publishes the whole
+ * workspace at the exact moment the operator believes they are resuming. Refusing costs a retry; publishing the wrong set
+ * costs a version. The same reasoning is why a name that is *in* the workspace but private is refused: it never goes to
+ * the registry, so it is not a place a release can be resumed from.
+ *
+ * @throws OrderError when the name is not in the order.
+ */
+export function resumeFrom(order: readonly string[], from: string): string[] {
+  const at = order.indexOf(from)
+  if (at === -1) {
+    const known = order.length > 0 ? order.join(', ') : '(nothing to publish)'
+    throw new OrderError(`${from} is not in the publish order, so there is nothing to resume from. The order is: ${known}`)
+  }
+  return order.slice(at)
+}
+
+/**
+ * The name after `--from`, when the flag was given at all.
+ *
+ * @throws OrderError when `--from` was given without a value. The alternative reading — "no name, so start at the
+ * beginning" — is the same trap as an unknown name: a full re-publish while the operator believes they are resuming.
+ */
+export function fromArgument(argv: readonly string[]): string | undefined {
+  const at = argv.indexOf('--from')
+  if (at === -1) {
+    return undefined
+  }
+  const value = argv[at + 1]
+  if (value === undefined || value.startsWith('--')) {
+    throw new OrderError('--from needs a package name, as in `--from @synra/client`')
+  }
+  return value
+}
+
 function main(): void {
   const root = join(fileURLToPath(new URL('.', import.meta.url)), '..')
   const execute = process.argv.includes('--publish')
@@ -159,10 +203,18 @@ function main(): void {
   const order = publishOrder(packages)
   const byName = new Map(packages.map((entry) => [entry.name, entry]))
 
+  // ★ Resuming is a named starting point rather than a flag that says "try again": which packages already went out is a
+  // fact the operator has and this script cannot discover without the registry.
+  const from = fromArgument(process.argv)
+  const remaining = from === undefined ? order : resumeFrom(order, from)
+
   if (!execute) {
     process.stdout.write('publish order (pass --publish to run it):\n')
   }
-  for (const name of order) {
+  if (from !== undefined) {
+    process.stdout.write(`resuming at ${from}: ${remaining.length} of ${order.length} package(s)\n`)
+  }
+  for (const name of remaining) {
     const entry = byName.get(name)
     if (entry) {
       publish(root, entry, execute)
