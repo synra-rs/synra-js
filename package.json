@@ -4,11 +4,13 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.15.1",
-  "engines": { "node": ">=20.19" },
+  "engines": {
+    "node": ">=20.19"
+  },
   "scripts": {
     "clean": "pnpm -r exec rm -rf dist",
     "build": "pnpm run clean && pnpm -r build",
-    "test": "pnpm -r test",
+    "test": "pnpm -r test && pnpm run test:scripts",
     "check": "tsc -b && pnpm run types:consumer && pnpm run shapes && pnpm run docs:types",
     "docs:types": "tsx scripts/check-doc-snippets.ts",
     "types:consumer": "tsx scripts/link-dist.ts && tsc -p packages/client/type-tests/tsconfig.json",
@@ -16,7 +18,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "sync": "pnpm --filter @synra/protocol sync",
-    "release": "bumpp -r"
+    "release": "bumpp -r",
+    "publish:workspace": "tsx scripts/publish.ts",
+    "test:scripts": "vitest run scripts"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",
