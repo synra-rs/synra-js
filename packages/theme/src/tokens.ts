@@ -249,6 +249,9 @@ export function cssVariables(): Record<string, string> {
   variables['--synra-glass'] = glass.color
   variables['--synra-glass-base'] = glass.base
   variables['--synra-blur'] = glass.blur
+  // ★ 饱和度也成为一个变量，理由是它**出现在两处**：UnoCSS 的 `floating` shortcut 与
+  //   `@synra/theme/antd` 那段给浮起层的 CSS。写两遍 140% 就是两处会漂移的取值（R6/R46）。
+  variables['--synra-saturate'] = glass.saturate
   variables['--synra-glow'] = glow
   variables['--synra-focus-ring'] = focusRing
 

@@ -694,17 +694,22 @@ if (rustSource !== null) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 9 · `@synra/theme` 的包根零依赖，而 `unocss` 只在它自己那一层
+// 9 · `@synra/theme` 的包根零依赖，而每个外部依赖只在它自己那一层
 // ─────────────────────────────────────────────────────────────────────────────
 //
-// ★ 这两条是"两层"这个设计的**承重墙**，它们是同一个决定的两种失败方式：
+// ★ 这两条是"分层"这个设计的**承重墙**，它们是同一个决定的两种失败方式：
 //
-//   - **包根依赖 `unocss`（9）**：官网为一个它不用的工具付一次装包与体积 —— 官网只要颜色，
-//     而颜色从包根取（`./css` 与 `./vitepress` 也都不碰 unocss）。
-//   - **`unocss` 的 import 散落到 `./css` 或 `./vitepress`（10）**：那时"子路径"名存实亡，
-//     消费者看到的仍然是一个必须装 `unocss` 的包，而分离只存在于目录结构上。
+//   - **包根依赖某个外部 UI（9）**：官网为一个它不用的工具付一次装包与体积 —— 官网只要颜色，
+//     而颜色从包根取（`./css` 与 `./vitepress` 也都不碰它们）。
+//   - **那个 import 散落到别的子路径（10）**：那时"子路径"名存实亡，
+//     消费者看到的仍然是一个必须装它的包，而分离只存在于目录结构上。
 //
 // 一条管"谁被拖累"，一条管"分离是不是真的"。
+//
+// ★ **2026-10-16：这条规则从"跑一遍"变成"跑两遍"。** 业主定下宿主用 antd 之后，
+//   `@synra/theme` 多了 `./antd` 子路径（[28 R51–R53]），而 `ant-design-vue` 与 `unocss`
+//   是完全同一种形状：一个只属于某一个子路径的外部依赖，大到不该让所有人付。
+//   判据一个字没改，改的只是下面那张表 —— 而**加第三个外部 UI 时也只需要加一行**。
 
 {
   const themeDirectory = join(jsRoot, 'packages', 'theme')
@@ -725,69 +730,87 @@ if (rustSource !== null) {
       `包根必须零依赖，而它声明了：${Object.keys(manifest.dependencies).join(', ')}`,
     )
   }
-  if (manifest.peerDependencies?.unocss === undefined) {
-    fail('theme-root', 'unocss 必须是 peerDependency：包根不用它，而 ./unocss 那一层要用')
-  }
-  if (manifest.peerDependenciesMeta?.unocss?.optional !== true) {
-    fail(
-      'theme-root',
-      'unocss 必须在 peerDependenciesMeta 里标成 optional —— 否则每个非 UnoCSS 消费者都要装它',
-    )
-  }
+  // ★ **同一条规则跑两遍**（R52）：每个"只属于某一层"的外部依赖，检查方式完全一样。
+  //   第三个外部 UI 进来时，这里只加一行 —— 而不是加一套守卫。
+  const externalLayers = [
+    { dependency: 'unocss', directory: 'src/unocss', consumer: './unocss' },
+    { dependency: 'ant-design-vue', directory: 'src/antd', consumer: './antd' },
+  ] as const
 
-  // 入口的声明里不该出现 unocss。查 `dist` 是因为发布出去的就是它；没构建时跳过并说明。
+  // 入口的声明里不该出现任何一个这样的依赖。查 `dist` 是因为发布出去的就是它；没构建时跳过并说明。
   const themeEntry = join(themeDirectory, 'dist', 'index.d.ts')
-  if (existsSync(themeEntry) && importsUnocss(read(themeEntry))) {
-    fail('theme-root', 'entry 里出现了 unocss 的 import —— 包根本该零依赖')
-  }
+  const entrySource = existsSync(themeEntry) ? read(themeEntry) : null
 
-  const offenders: string[] = []
-  const walkTheme = (directory: string): void => {
-    for (const entry of readdirSync(directory, { withFileTypes: true })) {
-      const full = join(directory, entry.name)
-      if (entry.isDirectory()) {
-        walkTheme(full)
-        continue
-      }
-      if (!entry.name.endsWith('.ts')) {
-        continue
-      }
-      const relative = full.slice(themeDirectory.length + 1).replaceAll('\\', '/')
-      if (relative.startsWith('src/unocss/')) {
-        continue
-      }
-      if (importsUnocss(read(full))) {
-        offenders.push(relative)
+  for (const layer of externalLayers) {
+    if (manifest.peerDependencies?.[layer.dependency] === undefined) {
+      fail(
+        'theme-root',
+        `${layer.dependency} 必须是 peerDependency：包根不用它，而 ${layer.consumer} 那一层要用`,
+      )
+    }
+    if (manifest.peerDependenciesMeta?.[layer.dependency]?.optional !== true) {
+      fail(
+        'theme-root',
+        `${layer.dependency} 必须在 peerDependenciesMeta 里标成 optional —— 否则每个不用它的消费者都要装它`,
+      )
+    }
+    if (entrySource !== null && importsDependency(entrySource, layer.dependency)) {
+      fail('theme-root', `entry 里出现了 ${layer.dependency} 的 import —— 包根本该零依赖`)
+    }
+
+    const offenders: string[] = []
+    const walkTheme = (directory: string): void => {
+      for (const entry of readdirSync(directory, { withFileTypes: true })) {
+        const full = join(directory, entry.name)
+        if (entry.isDirectory()) {
+          walkTheme(full)
+          continue
+        }
+        if (!entry.name.endsWith('.ts')) {
+          continue
+        }
+        const relative = full.slice(themeDirectory.length + 1).replaceAll('\\', '/')
+        if (relative.startsWith(`${layer.directory}/`)) {
+          continue
+        }
+        if (importsDependency(read(full), layer.dependency)) {
+          offenders.push(relative)
+        }
       }
     }
-  }
-  walkTheme(join(themeDirectory, 'src'))
-  if (offenders.length > 0) {
-    fail(
-      'theme-layers',
-      `只有 src/unocss/** 可以 import unocss，而这些文件也导入了：${offenders.join(', ')}`,
-    )
+    walkTheme(join(themeDirectory, 'src'))
+    if (offenders.length > 0) {
+      fail(
+        'theme-layers',
+        `只有 ${layer.directory}/** 可以 import ${layer.dependency}，而这些文件也导入了：${offenders.join(', ')}`,
+      )
+    }
   }
 
-  evidence.push('theme: 包根零依赖，unocss 只出现在 ./unocss 那一层')
+  evidence.push('theme: 包根零依赖，两个 optional peer（unocss / ant-design-vue）各自只在它那一层')
 }
 
 /**
- * 这个文件里有没有 import `unocss`。
+ * 这个文件里有没有 import 某个外部依赖。
  *
- * ★ **三种形态，第二种是负控制抓出来的**：`import … from 'unocss'`、**副作用导入** `import 'unocss'`、
- * 以及动态 `import('unocss')`。第一版的模式是 `from 'unocss'`，于是 `import 'unocss'` 从它下面走过去了 ——
+ * ★ **三种形态，第二种是负控制抓出来的**：`import … from '<dep>'`、**副作用导入** `import '<dep>'`、
+ * 以及动态 `import('<dep>')`。第一版的模式是 `from 'unocss'`，于是 `import 'unocss'` 从它下面走过去了 ——
  * 而那个形态恰恰是最容易被顺手写下的一个。
  *
  * ★ 而且模式不许"跑远"：`[^;]*?` 把匹配限制在**一条语句内**，所以多行 import 能命中，
- * 而"文件开头有个 import、文件末尾有个字符串 'unocss'"不会被当成同一件事
+ * 而"文件开头有个 import、文件末尾有个字符串 '<dep>'"不会被当成同一件事
  * （`synra-app` 的 `check-shapes` 里记着这个教训的另一种形态）。
+ *
+ * ★ 2026-10-16：依赖名成了参数（`ant-design-vue` 是第二个），所以名字里的 `-` / `.` 要转义 ——
+ * 否则 `ant-design-vue` 会被当成一个字符类，而那是一条永远为真的模式。
  */
-function importsUnocss(source: string): boolean {
+function importsDependency(source: string, dependency: string): boolean {
   // 先去掉行注释，否则一句"不要 import 'unocss'"的注释会把守卫骗红。
   const code = source.replace(/\/\/[^\n]*/g, '')
-  return /(?:^|\n)[ \t]*(?:import|export)\b[^;]*?['"]unocss['"]/.test(code)
-    || /\bimport\s*\(\s*['"]unocss['"]/.test(code)
+  const name = dependency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+  return new RegExp(`(?:^|\\n)[ \\t]*(?:import|export)\\b[^;]*?['"]${name}['"]`).test(code)
+    || new RegExp(`\\bimport\\s*\\(\\s*['"]${name}['"]`).test(code)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
