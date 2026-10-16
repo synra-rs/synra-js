@@ -21,6 +21,12 @@ export default antfu(
     // reason.
     markdown: false,
 
+    // ★ **TOML is off, for the same reason as in `synra-rust-app`: this repository has no TOML of its own.**
+    //   The only `.toml` files eslint could ever see are the checked-out kernel's — another project's
+    //   manifests, owned by another toolchain, linted by this one. A rule that can only ever be right by
+    //   accident is worth one line to remove (`toml/array-element-newline` is what it reported there).
+    toml: false,
+
     typescript: {
       tsconfigPath: './tsconfig.lint.json',
 
@@ -51,6 +57,14 @@ export default antfu(
       'packages/protocol/src/generated/**',
       // The install layout `scripts/link-dist.ts` lays out for the consumer type check.
       'packages/client/type-tests/node_modules/**',
+      // ★ **The kernel is checked out *into* this repository by `release.yaml`**, so that `check-shapes`
+      //   can compare against it (that workflow's `path:` has to be inside the workspace —
+      //   `actions/checkout` refuses to write outside it). It is **tooling input, not part of this
+      //   repository**: without this line `eslint .` lints another project's files, and the release
+      //   failed with **320 errors in `synra-rust-core/**`'s `Cargo.toml`s**. Nobody sees that
+      //   locally, because there is no checkout here — the same shape as the `pnpm install` failure
+      //   that preceded it.
+      'synra-rust-core/**',
     ],
   },
 
