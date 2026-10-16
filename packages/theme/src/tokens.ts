@@ -63,6 +63,19 @@ export const colors = {
 } as const
 
 /**
+ * `#rrggbb` + 百分比 → `rgb(r g b / p%)`。
+ *
+ * ★ 有这个函数是因为半透明的形态**必须是算出来的**：`--synra-glow` 手写成
+ * `rgb(124 92 255 / 45%)` 时，它和 `colors.primary` 之间的那层关系只存在于人的记忆里 ——
+ * 换一支紫，光晕会**静默地**还是旧的那一支，而两者在暗底上都很像。
+ */
+export function withAlpha(hex: string, percent: number): string {
+  const digits = hex.replace('#', '')
+  const channels = [0, 2, 4].map(at => Number.parseInt(digits.slice(at, at + 2), 16))
+  return `rgb(${channels.join(' ')} / ${String(percent)}%)`
+}
+
+/**
  * 毛玻璃。
  *
  * # 为什么它必须成对声明
@@ -74,14 +87,14 @@ export const colors = {
  * 不要用模糊半径。（同 R46）
  */
 export const glass = {
-  color: 'rgb(28 22 48 / 62%)',
+  color: withAlpha(colors.raised, 62),
   base: colors.raised,
   blur: '14px',
   saturate: '140%',
 } as const
 
 /** 发光。它表示"这里活着"，不是皮肤：只有焦点环、那条线的活动态、主按钮按下态三处用它。 */
-export const glow = 'rgb(124 92 255 / 45%)' as const
+export const glow = withAlpha(colors.primary, 45)
 
 /** 焦点环：先一圈底色（把环从背景里切出来），再一圈主色。 */
 export const focusRing = `0 0 0 2px ${colors.screen}, 0 0 0 4px ${colors.primaryInk}` as const
