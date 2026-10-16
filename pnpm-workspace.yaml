@@ -1,14 +1,20 @@
 packages:
   - packages/*
 
-# ★ pnpm 11 在装 `ant-design-vue` 时**自己往这个文件里写了一行占位**：
-#   `core-js: set this to true or false` —— 因为 ant-design-vue 带进来一个带 postinstall 的依赖。
-#   那个脚本是 core-js 的捐赠横幅，对功能没有任何作用，所以显式关掉：
-#   保持"依赖的脚本默认不跑"这条供应链默认，而不是为了消掉一条提示把它打开。
+# ★ **依赖的构建脚本只有一个开关，不要开两个。**
+#
+# 2026-10-16 踩到的：`onlyBuiltDependencies`（允许名单）与 `allowBuilds`（逐包布尔）是 pnpm 的两套机制，
+# 而**后者在场时前者不再决定结果**。当时只为挡 core-js 而加了一行 `allowBuilds`，esbuild 就从"允许"
+# 变成了"未允许"，release 的 CI 在 `pnpm install` 时以 `ERR_PNPM_IGNORED_BUILDS` 失败。
+#
+# 本地一开始没暴露（esbuild 的原生二进制早就装好了），`pnpm install --force` 能复现；
+# 而且 pnpm 复现时**自己又往这个文件里补了一行占位** `esbuild: set this to true or false` ——
+# 也就是说它同意：在 `allowBuilds` 在场的世界里，旧的那个开关不再算数。
+#
+# 现在只有这张表，两行各自有理由：
 allowBuilds:
+  # core-js 的 postinstall 是它的捐赠横幅，对功能没有任何作用 —— 关掉，
+  # 保持"依赖的脚本默认不跑"这条供应链默认，而不是为了消掉一条提示把它打开。
   core-js: false
-
-# esbuild ships a native binary built by a postinstall script. Allowing it is required for
-# `esno` (which runs `scripts/**`) and `vitest`; nothing else in this workspace runs build scripts.
-onlyBuiltDependencies:
-  - esbuild
+  # esbuild 发布的是原生二进制，`esno`（跑 scripts/**）与 `vitest` 都依赖它的 postinstall —— 必须放行。
+  esbuild: true
