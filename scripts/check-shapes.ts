@@ -103,16 +103,33 @@ const RUST_CONVENTIONS: Record<string, string | null> = {
  *
  * 取**最后**一个匹配，因为它紧邻声明：前面的那些属于别的类型。
  */
-function rustConvention(source: string, typeName: string): string | null {
+export function rustConvention(source: string, typeName: string): string | null {
   const declaration = new RegExp(`pub (?:struct|enum) ${typeName}\\b`).exec(source)
   if (declaration === null) return null
   const before = source.slice(Math.max(0, declaration.index - 4_000), declaration.index)
   const matches = [...before.matchAll(/#\[serde\([^)]*rename_all = "([a-zA-Z_-]+)"/g)]
-  return matches.at(-1)?.[1] ?? null
+  // ★ A convention belongs to this type only if no other type is declared between it and this one.
+  //
+  // The first version took the nearest preceding match, on the reasoning that it sits adjacent to the declaration. That
+  // holds when a type has a convention, and fails when it does not: the previous type's is then the nearest one, and it is
+  // read as this type's. The caller's "this type has no `rename_all`" failure was therefore unreachable in that case, so
+  // the guard could report a convention the type does not have — and, worse, call it agreement when the neighbour's
+  // happened to match the table. A test written to pin this behaviour is what found it.
+  for (let index = matches.length - 1; index >= 0; index -= 1) {
+    const match = matches[index]
+    if (match === undefined) {
+      continue
+    }
+    const after = before.slice((match.index ?? 0) + match[0].length)
+    if (!/pub (?:struct|enum)\s/.test(after)) {
+      return match[1] ?? null
+    }
+  }
+  return null
 }
 
 /** TS 侧 `ErrorCode` 的取值。 */
-function tsErrorCodes(wire: string): string[] {
+export function tsErrorCodes(wire: string): string[] {
   const start = wire.indexOf('export type ErrorCode =')
   if (start < 0) return []
   const end = wire.indexOf('\n\n', start)
@@ -123,7 +140,7 @@ function tsErrorCodes(wire: string): string[] {
 }
 
 /** Rust 侧 `ErrorCode` 的变体，转成 `snake_case`。 */
-function rustErrorCodes(source: string): string[] {
+export function rustErrorCodes(source: string): string[] {
   const declaration = /pub enum ErrorCode\s*\{([\s\S]*?)\n\}/.exec(source)
   const body = declaration?.[1]
   if (body === undefined) return []
@@ -145,7 +162,7 @@ function rustErrorCodes(source: string): string[] {
  * whose own correctness has to be reasoned about, and the shapes here are a handful of digits and
  * asterisks.
  */
-function evaluateProduct(expression: string): number {
+export function evaluateProduct(expression: string): number {
   let total = 1
   for (const factor of expression.split('*')) {
     const digits = factor.trim()
