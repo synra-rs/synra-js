@@ -1,6 +1,6 @@
 {
   "name": "@synra/protocol",
-  "version": "0.0.0",
+  "version": "0.0.8",
   "description": "Synra wire protocol types. Generated from the Rust kernel; do not edit by hand.",
   "license": "MIT",
   "homepage": "https://github.com/synra-rs/synra-js#readme",
