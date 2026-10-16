@@ -32,6 +32,10 @@
  * `./unocss` 子路径上，并且在 `package.json` 里是 `peerDependenciesMeta.optional`。
  */
 
+export { css, resetCss, tokensCss } from './css.js'
+
+export type { PreflightTier } from './css.js'
+
 export {
   breakpoints,
   colors,
@@ -50,8 +54,4 @@ export {
   withAlpha,
   zIndex,
 } from './tokens.js'
-
 export type { ContrastPair } from './tokens.js'
-
-export { css, resetCss, tokensCss } from './css.js'
-export type { PreflightTier } from './css.js'

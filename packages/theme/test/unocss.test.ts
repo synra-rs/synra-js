@@ -9,12 +9,12 @@
  * 官网的排版能不能活，取决于那一份没漏进来，而这件事只有生成一次 CSS 才知道。
  */
 
-import { createGenerator } from 'unocss'
 import type { Preset } from 'unocss'
-import { describe, expect, it } from 'vitest'
-
-import { colors, glass } from '../src/index.js'
 import type { PreflightTier } from '../src/index.js'
+import { createGenerator } from 'unocss'
+
+import { describe, expect, it } from 'vitest'
+import { colors, glass } from '../src/index.js'
 import { presetSynra, structuralShortcuts, synraBlocklist, synraConfig, synraTheme, synraThemeColors } from '../src/unocss/index.js'
 
 function kebab(key: string): string {

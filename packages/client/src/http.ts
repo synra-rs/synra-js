@@ -92,10 +92,10 @@ export interface SynraResponse {
  * 的地址是配置问题，超时是网络问题，"响应太大"是插件自己的问题。塌缩成一个"出网失败"会让用
  * 户拿不到能行动的信息。
  */
-export type SynraFetchErrorCode =
-  | 'scheme_not_allowed'
-  | 'host_not_allowed'
-  | 'ip_not_allowed'
-  | 'redirect_blocked'
-  | 'response_too_large'
-  | 'timeout'
+export type SynraFetchErrorCode
+  = | 'scheme_not_allowed'
+    | 'host_not_allowed'
+    | 'ip_not_allowed'
+    | 'redirect_blocked'
+    | 'response_too_large'
+    | 'timeout'

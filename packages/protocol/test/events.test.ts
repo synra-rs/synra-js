@@ -10,9 +10,9 @@
  * 进度是比例而非字节数。这些全是类型层面的事实，也正是这个包存在的理由。
  */
 
-import { describe, expect, it } from 'vitest'
-
 import type { KernelEvent, SequencedKernelEvent } from '../src/generated/events'
+
+import { describe, expect, it } from 'vitest'
 
 /** 一个最小的事件。 */
 function logLine(line = 'x'): KernelEvent {
