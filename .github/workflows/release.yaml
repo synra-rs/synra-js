@@ -77,17 +77,16 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
-      - name: The generated protocol types are unmodified
-        # 一个被手改过的生成物，会在重新同步后变成一个 diff。这里跑的是**生成器**而不是守卫，
-        # 因为只有生成器能证明两边一致。
-        if: ${{ hashFiles('synra-rust-core/Cargo.toml') != '' }}
-        run: |
-          pnpm --filter @synra/protocol sync
-          if [ -n "$(git status --porcelain packages/protocol/src/generated)" ]; then
-            echo "::error::the generated protocol types are out of sync with the Rust crate"
-            git --no-pager diff -- packages/protocol/src/generated
-            exit 1
-          fi
+      # ★ 这里**曾经**有一步"生成物未被手改"：`pnpm --filter @synra/protocol sync` + `git diff`。
+      #   它从旧 `ci.yml` 搬过来，而它**永远不可能通过**，原因有两条，各自都足够：
+      #
+      #   1. `sync` 现在不是生成器。它按设计打印一段说明并 `exit 1`（"`generated/` 是手写的，别再假装
+      #      它在生成；要核对就跑 `pnpm run shapes`"）。所以这一步在 bash 的 `set -e` 下当场失败。
+      #   2. "重新生成再 diff"这件事在生成器不存在时是不可能的 —— `synra-protocol` 从来没有过
+      #      `ts-export` 特性，那三个文件一直是手写的（见 `25 §2.2`）。
+      #
+      #   真正的检查已经在上面那一步里：`pnpm run check` 的 `shapes` 拿镜像与内核**逐字段对照**，
+      #   而那是"能失败的检查"，也正是 `sync` 的说明让人去跑的那一个。
 
       - name: Build
         run: pnpm run build
