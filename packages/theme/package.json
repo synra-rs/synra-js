@@ -1,7 +1,7 @@
 {
   "name": "@synra/theme",
   "type": "module",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "The Synra design tokens, and the adapters that carry them into UnoCSS, ant-design-vue, VitePress and plain CSS.",
   "author": "imba97",
   "license": "MIT",
