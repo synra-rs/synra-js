@@ -1,4 +1,3 @@
-#!/usr/bin/env tsx
 /**
  * Lays out the built packages the way an install does.
  *
