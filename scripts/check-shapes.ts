@@ -642,8 +642,11 @@ if (rustSource !== null) {
   //
   //   设计文档 §4.1 说的是"三个包同步版本"，而仓库里可发布的是**四个**（`testkit` 也是）：
   //   它的数量也一并更正了 —— 一条只守三个包的守卫会漏掉第四个。
-  const publishable = ['client', 'protocol', 'synra', 'testkit'] as const
-  const versions = publishable.map((name) => {
+  // ★ 名字从 `publishable` 改成 `versionSynced`：可发布的是**五个**，而共用一条版本线的是**四个**。
+  //   把 `@synra/theme` 也加进这个数组会让人以为它属于这条线 —— 而它在设计上是独立的
+  //   （`25 §4.1` 的 ★：它不 re-export 上面的包，也不被它们依赖，所以没有需要对代的代次）。
+  const versionSynced = ['client', 'protocol', 'synra', 'testkit'] as const
+  const versions = versionSynced.map((name) => {
     const manifest = JSON.parse(read(join(jsRoot, 'packages', name, 'package.json'))) as {
       readonly version?: string
     }
@@ -662,6 +665,118 @@ if (rustSource !== null) {
   evidence.push(
     `${String(versions.length)} publishable packages share version ${first?.version ?? '(none)'}`,
   )
+
+  // ★ 而 `@synra/theme` 也要进 registry，所以要有人管它的 `publishConfig` —— 但它**不在这条线上**。
+  //   这条守卫只回答"它准备好被发布了没有"，不回答"它的版本号是多少"：后者由发布时的标签守卫管
+  //   （`scripts/check-release-tag.ts`，见 `25 §6.1`）。
+  const theme = JSON.parse(read(join(jsRoot, 'packages', 'theme', 'package.json'))) as {
+    readonly version?: string
+    readonly publishConfig?: { readonly access?: string }
+  }
+  if (theme.publishConfig?.access !== 'public') {
+    fail(
+      'version-sync',
+      'packages/theme 是要发布的包，所以 publishConfig.access 必须是 public（scoped 包默认是 private）',
+    )
+  }
+  evidence.push(`@synra/theme@${theme.version ?? '(none)'} 独立一条版本线，与那四个无关`)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9 · `@synra/theme` 的包根零依赖，而 `unocss` 只在它自己那一层
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// ★ 这两条是"两层"这个设计的**承重墙**，它们是同一个决定的两种失败方式：
+//
+//   - **包根依赖 `unocss`（9）**：官网为一个它不用的工具付一次装包与体积 —— 官网只要颜色，
+//     而颜色从包根取（`./css` 与 `./vitepress` 也都不碰 unocss）。
+//   - **`unocss` 的 import 散落到 `./css` 或 `./vitepress`（10）**：那时"子路径"名存实亡，
+//     消费者看到的仍然是一个必须装 `unocss` 的包，而分离只存在于目录结构上。
+//
+// 一条管"谁被拖累"，一条管"分离是不是真的"。
+
+{
+  const themeDirectory = join(jsRoot, 'packages', 'theme')
+  const manifest = JSON.parse(read(join(themeDirectory, 'package.json'))) as {
+    readonly name?: string
+    readonly dependencies?: Record<string, string>
+    readonly peerDependencies?: Record<string, string>
+    readonly peerDependenciesMeta?: Record<string, { readonly optional?: boolean }>
+  }
+
+  if (manifest.name !== '@synra/theme') {
+    fail('theme-root', `packages/theme 的 name 是 ${manifest.name ?? '(none)'}，而不是 @synra/theme`)
+  }
+
+  if (manifest.dependencies !== undefined && Object.keys(manifest.dependencies).length > 0) {
+    fail(
+      'theme-root',
+      `包根必须零依赖，而它声明了：${Object.keys(manifest.dependencies).join(', ')}`,
+    )
+  }
+  if (manifest.peerDependencies?.unocss === undefined) {
+    fail('theme-root', 'unocss 必须是 peerDependency：包根不用它，而 ./unocss 那一层要用')
+  }
+  if (manifest.peerDependenciesMeta?.unocss?.optional !== true) {
+    fail(
+      'theme-root',
+      'unocss 必须在 peerDependenciesMeta 里标成 optional —— 否则每个非 UnoCSS 消费者都要装它',
+    )
+  }
+
+  // 入口的声明里不该出现 unocss。查 `dist` 是因为发布出去的就是它；没构建时跳过并说明。
+  const themeEntry = join(themeDirectory, 'dist', 'index.d.ts')
+  if (existsSync(themeEntry) && importsUnocss(read(themeEntry))) {
+    fail('theme-root', 'entry 里出现了 unocss 的 import —— 包根本该零依赖')
+  }
+
+  const offenders: string[] = []
+  const walkTheme = (directory: string): void => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const full = join(directory, entry.name)
+      if (entry.isDirectory()) {
+        walkTheme(full)
+        continue
+      }
+      if (!entry.name.endsWith('.ts')) {
+        continue
+      }
+      const relative = full.slice(themeDirectory.length + 1).replaceAll('\\', '/')
+      if (relative.startsWith('src/unocss/')) {
+        continue
+      }
+      if (importsUnocss(read(full))) {
+        offenders.push(relative)
+      }
+    }
+  }
+  walkTheme(join(themeDirectory, 'src'))
+  if (offenders.length > 0) {
+    fail(
+      'theme-layers',
+      `只有 src/unocss/** 可以 import unocss，而这些文件也导入了：${offenders.join(', ')}`,
+    )
+  }
+
+  evidence.push('theme: 包根零依赖，unocss 只出现在 ./unocss 那一层')
+}
+
+/**
+ * 这个文件里有没有 import `unocss`。
+ *
+ * ★ **三种形态，第二种是负控制抓出来的**：`import … from 'unocss'`、**副作用导入** `import 'unocss'`、
+ * 以及动态 `import('unocss')`。第一版的模式是 `from 'unocss'`，于是 `import 'unocss'` 从它下面走过去了 ——
+ * 而那个形态恰恰是最容易被顺手写下的一个。
+ *
+ * ★ 而且模式不许"跑远"：`[^;]*?` 把匹配限制在**一条语句内**，所以多行 import 能命中，
+ * 而"文件开头有个 import、文件末尾有个字符串 'unocss'"不会被当成同一件事
+ * （`synra-app` 的 `check-shapes` 里记着这个教训的另一种形态）。
+ */
+function importsUnocss(source: string): boolean {
+  // 先去掉行注释，否则一句"不要 import 'unocss'"的注释会把守卫骗红。
+  const code = source.replace(/\/\/[^\n]*/g, '')
+  return /(?:^|\n)[ \t]*(?:import|export)\b[^;]*?['"]unocss['"]/.test(code)
+    || /\bimport\s*\(\s*['"]unocss['"]/.test(code)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
