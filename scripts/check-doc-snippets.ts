@@ -1,4 +1,3 @@
-#!/usr/bin/env tsx
 /**
  * Guard 8: the code in the client library's design document has to compile.
  *

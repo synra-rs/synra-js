@@ -27,7 +27,7 @@
   "scripts": {
     "build": "tsc -b",
     "test": "vitest run --passWithNoTests",
-    "sync": "tsx ../../scripts/gen-protocol-types.ts"
+    "sync": "esno ../../scripts/gen-protocol-types.ts"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
