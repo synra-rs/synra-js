@@ -7,21 +7,22 @@
   // `noEmit` and `composite: false` because this project exists to be *read*: nothing is built from it.
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true,
     "composite": false,
-    "declaration": false,
-    "declarationMap": false,
-    "sourceMap": false,
-    "types": ["node"],
     "baseUrl": ".",
     "paths": {
       "@synra/client": ["packages/client/src/index.ts"],
       "@synra/protocol": ["packages/protocol/src/index.ts"],
       "@synra/testkit": ["packages/testkit/src/index.ts"],
       "synra": ["packages/synra/src/index.ts"]
-    }
+    },
+    "types": ["node"],
+    "declaration": false,
+    "declarationMap": false,
+    "noEmit": true,
+    "sourceMap": false
   },
   "include": [
+    "eslint.config.ts",
     "packages/*/src/**/*.ts",
     "packages/*/test/**/*.ts",
     "packages/*/type-tests/**/*.ts",

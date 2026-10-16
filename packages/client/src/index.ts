@@ -26,42 +26,42 @@
 //   能拿到全局声明。删掉它，全局 `synra` 就只在显式 import 本包时可见。
 import './global'
 
-export type {
-  // 注入对象
-  SynraClient,
-  Unsubscribe,
-  // 环境与能力
-  EnvNamespace,
-  ClientFeature,
-  PlatformCapability,
-  // 各 namespace
-  LogNamespace,
-  EventNamespace,
-  DeviceNamespace,
-  PickOptions,
-  DeviceTarget,
-  StorageNamespace,
-  NetworkNamespace,
-  TransferNamespace,
-  TransferStatus,
-  TransferProgress,
-  PlatformNamespace,
-  ClipboardNamespace,
-  SelfNamespace,
-  ActionDescriptor,
-} from './surface'
-
 // 出网形状来自 `http.ts` —— 它是两侧共同的形状契约，所以从那里导出而不是经 `surface`。
 export type {
+  SynraFetchErrorCode,
   SynraFetchInit,
   SynraFetchMethod,
   SynraResponse,
-  SynraFetchErrorCode,
 } from './http'
 
 export type {
-  SynraError,
-  ErrorCode as SynraErrorCode,
+  ActionDescriptor,
+  ClientFeature,
+  ClipboardNamespace,
+  DeviceNamespace,
+  DeviceTarget,
+  // 环境与能力
+  EnvNamespace,
+  EventNamespace,
+  // 各 namespace
+  LogNamespace,
+  NetworkNamespace,
+  PickOptions,
+  PlatformCapability,
+  PlatformNamespace,
+  SelfNamespace,
+  StorageNamespace,
+  // 注入对象
+  SynraClient,
+  TransferNamespace,
+  TransferProgress,
+  TransferStatus,
+  Unsubscribe,
+} from './surface'
+
+export type {
   NetworkErrorCode,
   SuggestedAction,
+  SynraError,
+  ErrorCode as SynraErrorCode,
 } from '@synra/protocol'

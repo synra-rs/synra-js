@@ -1,7 +1,9 @@
 {
   "name": "synra-js",
+  "type": "module",
   "version": "0.0.8",
   "private": true,
+  "packageManager": "pnpm@11.15.1",
   "author": "imba97",
   "license": "MIT",
   "homepage": "https://github.com/synra-rs/synra-js#readme",
@@ -12,8 +14,6 @@
   "bugs": {
     "url": "https://github.com/synra-rs/synra-js/issues"
   },
-  "type": "module",
-  "packageManager": "pnpm@11.15.1",
   "engines": {
     "node": ">=20.19"
   },
@@ -27,21 +27,20 @@
     "shapes": "esno scripts/check-shapes.ts",
     "check:release-tag": "esno scripts/check-release-tag.ts",
     "lint": "eslint .",
-    "format": "prettier --write .",
+    "lint:fix": "eslint . --fix",
     "sync": "pnpm --filter @synra/protocol sync",
     "release": "bumpp -r",
     "publish:workspace": "esno scripts/publish.ts",
     "test:scripts": "vitest run scripts"
   },
   "devDependencies": {
-    "@eslint/js": "^9.20.0",
+    "@antfu/eslint-config": "^9.5.1",
     "@types/node": "^24.0.0",
     "bumpp": "^10.1.0",
-    "eslint": "^9.20.0",
+    "eslint": "^10.12.0",
     "esno": "^4.8.0",
-    "prettier": "^3.4.0",
+    "jiti": "^2.7.0",
     "typescript": "^5.7.0",
-    "typescript-eslint": "^8.24.0",
     "vitest": "^3.0.0"
   }
 }

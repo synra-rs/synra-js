@@ -16,7 +16,7 @@
  * 用法：`GITHUB_REF_NAME=v0.0.0 pnpm run check:release-tag`（CI 里这个变量由 Actions 给）。
  */
 
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -80,7 +80,7 @@ export function readPublishableVersions(root: string): PackageVersion[] {
     if (parsed.private === true) {
       continue
     }
-    if (!parsed.name || !parsed.version) {
+    if (parsed.name === undefined || parsed.name === '' || parsed.version === undefined || parsed.version === '') {
       throw new Error(`${manifest} 没有 name 或 version`)
     }
     found.push({ name: parsed.name, version: parsed.version })
@@ -105,6 +105,6 @@ function main(): void {
 }
 
 // 只有作为程序运行时才跑，这样测试可以直接 import 上面两个纯函数。
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1]) {
   main()
 }

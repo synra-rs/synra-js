@@ -52,8 +52,8 @@ synra-js/
 // 一个插件的 ui/package.json —— 只装这一个
 {
   "devDependencies": {
-    "@synra/client": "^1.0.0",     // ★ 类型；`synra` 由它的传递依赖提供
-    "@synra/testkit": "^1.0.0"     // 可选：本地开发与单测
+    "@synra/client": "^1.0.0", // ★ 类型；`synra` 由它的传递依赖提供
+    "@synra/testkit": "^1.0.0" // 可选：本地开发与单测
   }
 }
 ```

@@ -21,12 +21,12 @@
  * 所以图标一律构建期内联（`cdn: false`），并用 `@iconify-json/*` 作为 devDependency。
  */
 
-import { presetIcons } from 'unocss'
 import type { UserConfig } from 'unocss'
+import type { SynraPresetOptions } from './preset.js'
 
+import { presetIcons } from 'unocss'
 import { synraBlocklist } from './blocklist.js'
 import { presetSynra } from './preset.js'
-import type { SynraPresetOptions } from './preset.js'
 
 /** `synraConfig` 的选项。 */
 export interface SynraConfigOptions extends SynraPresetOptions {
@@ -57,7 +57,7 @@ export function synraConfig(options: SynraConfigOptions = {}): UserConfig {
               //   必然失败，而失败的样子是一排空方块 —— 它看起来像图标库坏了，而不是像网络被拒。
               scale: 1,
               extraProperties: {
-                display: 'inline-block',
+                'display': 'inline-block',
                 'vertical-align': 'text-bottom',
               },
             }),

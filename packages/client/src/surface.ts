@@ -35,33 +35,33 @@ import type { SynraFetchInit, SynraResponse } from './http'
  * 存在的理由：一个"预留但未实现"的能力需要一个自述机制，否则作者只能靠"调用失败再看错误"来
  * 探测 —— 体验差，而且日志里全是预期内的失败。
  */
-export type ClientFeature =
-  | 'device.onChange'
-  | 'device.pick'
-  | 'transfer.onProgress'
-  | 'event.subscribe'
-  | 'network.fetch'
-  | 'clipboard.read'
+export type ClientFeature
+  = | 'device.onChange'
+    | 'device.pick'
+    | 'transfer.onProgress'
+    | 'event.subscribe'
+    | 'network.fetch'
+    | 'clipboard.read'
 
 /** 宿主平台支持的能力。**不是**插件被授予的能力。 */
-export type PlatformCapability =
-  | 'open_url'
-  | 'open_path'
-  | 'reveal_path'
-  | 'simulate_keys'
-  | 'notify'
-  | 'clipboard_read'
-  | 'clipboard_write'
+export type PlatformCapability
+  = | 'open_url'
+    | 'open_path'
+    | 'reveal_path'
+    | 'simulate_keys'
+    | 'notify'
+    | 'clipboard_read'
+    | 'clipboard_write'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 错误
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type {
-  ErrorCode as SynraErrorCode,
   NetworkErrorCode,
   SuggestedAction,
   SynraError,
+  ErrorCode as SynraErrorCode,
 } from '@synra/protocol'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -134,9 +134,9 @@ export interface DeviceNamespace {
   /** 已配对且**在线**的设备。 */
   list(): Promise<DeviceTarget[]>
   /** 发给一台设备。 */
-  send(req: { to: DeviceId; event: string; payload?: unknown }): Promise<void>
+  send(req: { to: DeviceId, event: string, payload?: unknown }): Promise<void>
   /** 发给所有已配对且在线的设备。 */
-  broadcast(req: { event: string; payload?: unknown }): Promise<void>
+  broadcast(req: { event: string, payload?: unknown }): Promise<void>
   /** 设备集合变化。宿主侧包了一层订阅与合并去重。 */
   onChange(handler: (devices: DeviceTarget[]) => void): Unsubscribe
   /**
@@ -192,7 +192,7 @@ export interface StorageNamespace {
   /** 列出键，可按前缀过滤。 */
   keys(prefix?: string): Promise<string[]>
   /** 用了多少、上限多少。 */
-  quota(): Promise<{ usedBytes: number; maxBytes: number }>
+  quota(): Promise<{ usedBytes: number, maxBytes: number }>
 }
 
 /** 出网。 */
@@ -263,7 +263,7 @@ export interface TransferProgress {
  */
 export interface PlatformNamespace {
   openUrl(url: string): Promise<void>
-  notify(req: { title: string; body: string }): Promise<void>
+  notify(req: { title: string, body: string }): Promise<void>
 }
 
 /** 剪贴板。 */
