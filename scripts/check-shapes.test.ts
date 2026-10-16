@@ -12,9 +12,37 @@
  * rely on: four-space indentation, a trailing comma, `rename_all` on the line above.
  */
 
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-import { evaluateProduct, rustConvention, rustErrorCodes, tsErrorCodes } from './check-shapes'
+import { evaluateProduct, kernelCandidates, rustConvention, rustErrorCodes, tsErrorCodes } from './check-shapes'
+
+describe('kernelCandidates', () => {
+  // 期望值用 `join` 拼，因为这个函数返回的就是平台自己的分隔符：在 Windows 上写死 `/a/b`
+  // 会让这三条测试只在 CI 上通过、在开发机上失败——而那种测试的下一步是被跳过。
+  it('prefers the named root, then beside the repository, then inside it', () => {
+    const root = join('/work', 'synra-js')
+    expect(kernelCandidates(root, '/core')).toEqual([
+      '/core',
+      join('/work', 'synra-rust-core'),
+      join(root, 'synra-rust-core'),
+    ])
+  })
+
+  // ★ 这一条就是那个已经漏过一次的 bug。`actions/checkout` 只能把内核放进工作区**里面**
+  // （放到工作区之外会被拒绝），而候选里原先只有"旁边"那一个——于是 CI 的对照一直静默跳过，
+  // 而绿色的摘要和"从未对照过"的摘要在输出里长得一样。
+  it('includes the layout actions/checkout produces', () => {
+    const root = join('/work', 'synra-js')
+    expect(kernelCandidates(root, undefined)).toContain(join(root, 'synra-rust-core'))
+  })
+
+  // 一个空的 SYNRA_CORE_ROOT 是"没给"，不是"找当前目录"：空路径会被 existsSync 判成真，
+  // 于是所有对照都对着工作目录跑一遍，全部报成"内核里没有这个类型"。
+  it('drops an empty SYNRA_CORE_ROOT rather than looking in the empty path', () => {
+    expect(kernelCandidates(join('/work', 'synra-js'), '')).not.toContain('')
+  })
+})
 
 describe('rustErrorCodes', () => {
   it('reads the variants and writes them the way the wire does', () => {

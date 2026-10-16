@@ -143,8 +143,11 @@ export function readWorkspace(root: string): PackageInfo[] {
 }
 
 /** Publishes one package, or prints what it would run. */
-function publish(root: string, entry: PackageInfo, execute: boolean): void {
+function publish(root: string, entry: PackageInfo, execute: boolean, provenance: boolean): void {
   const args = ['--filter', entry.name, 'publish', '--access', 'public', '--no-git-checks']
+  if (provenance) {
+    args.push('--provenance')
+  }
   if (!execute) {
     process.stdout.write(`would run: pnpm ${args.join(' ')}\n`)
     return
@@ -199,6 +202,10 @@ export function fromArgument(argv: readonly string[]): string | undefined {
 function main(): void {
   const root = join(fileURLToPath(new URL('.', import.meta.url)), '..')
   const execute = process.argv.includes('--publish')
+  // ★ `--provenance` 是 opt-in 而不是默认，因为它需要一个 OIDC 提供方：GitHub Actions 有，本机没有。
+  //   默认带上它会让本地那条"发到一半失败后继续"的口子直接失败，而那条口子是这个脚本存在的理由之一。
+  //   CI 里由 `.github/workflows/release.yaml` 显式传入。
+  const provenance = process.argv.includes('--provenance')
   const packages = readWorkspace(root)
   const order = publishOrder(packages)
   const byName = new Map(packages.map((entry) => [entry.name, entry]))
@@ -217,7 +224,7 @@ function main(): void {
   for (const name of remaining) {
     const entry = byName.get(name)
     if (entry) {
-      publish(root, entry, execute)
+      publish(root, entry, execute, provenance)
     }
   }
   // Named, because "published 3 packages" leaves out the one that was skipped for being private, and a release that quietly

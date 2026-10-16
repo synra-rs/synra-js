@@ -15,6 +15,7 @@
     "docs:types": "tsx scripts/check-doc-snippets.ts",
     "types:consumer": "tsx scripts/link-dist.ts && tsc -p packages/client/type-tests/tsconfig.json",
     "shapes": "tsx scripts/check-shapes.ts",
+    "check:release-tag": "tsx scripts/check-release-tag.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
     "sync": "pnpm --filter @synra/protocol sync",
