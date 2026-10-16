@@ -1,6 +1,13 @@
 packages:
   - packages/*
 
+# ★ pnpm 11 在装 `ant-design-vue` 时**自己往这个文件里写了一行占位**：
+#   `core-js: set this to true or false` —— 因为 ant-design-vue 带进来一个带 postinstall 的依赖。
+#   那个脚本是 core-js 的捐赠横幅，对功能没有任何作用，所以显式关掉：
+#   保持"依赖的脚本默认不跑"这条供应链默认，而不是为了消掉一条提示把它打开。
+allowBuilds:
+  core-js: false
+
 # esbuild ships a native binary built by a postinstall script. Allowing it is required for
 # `esno` (which runs `scripts/**`) and `vitest`; nothing else in this workspace runs build scripts.
 onlyBuiltDependencies:

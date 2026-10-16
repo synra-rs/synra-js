@@ -30,7 +30,7 @@ describe('cssVariables', () => {
       expect(variables[name], `${name} 应该存在`).toBe(colors[key as keyof typeof colors])
     }
 
-    const colourVariables = Object.keys(variables).filter(name => /^--synra-(?!glass|blur|glow|focus|font|radius|z-|duration|ease)/.test(name))
+    const colourVariables = Object.keys(variables).filter(name => /^--synra-(?!glass|blur|saturate|glow|focus|font|radius|z-|duration|ease)/.test(name))
     expect(colourVariables).toHaveLength(Object.keys(colors).length)
   })
 
@@ -64,6 +64,10 @@ describe('cssVariables', () => {
         '--synra-radius-pill',
         '--synra-radius-surface',
         '--synra-raised',
+        // ★ 2026-10-16 加：饱和度出现在**两处**（UnoCSS 的 `floating` shortcut 与 `@synra/theme/antd`
+        //   那段给浮起层的 CSS），写两遍 140% 就是两处会漂移的取值 —— 所以它升格成变量。
+        //   这条测试要求"加一个 token 是一次显式决定"，而这就是那次决定。
+        '--synra-saturate',
         '--synra-screen',
         '--synra-surface',
         '--synra-warn',
