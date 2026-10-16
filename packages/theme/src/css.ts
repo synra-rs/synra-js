@@ -63,6 +63,23 @@ export function resetCss(): string {
     '  font-size: 0.875rem;',
     '  line-height: 1.55;',
     '}',
+    '',
+    '/* ★ R30（尊重"减少动效"）只能在这一层兑现，这是它必须写在这里的原因。',
+    '',
+    '   我们自己的动效是工具类（`motion-reduce:animate-none`），作者写就有、不写就没有 —— 也就是说它靠自觉。',
+    '   而**组件库的动效我们够不着**：antd 的过渡由它自己的 CSS-in-JS 注入，一个工具类到不了那里。',
+    '   文档层的 `*` 是唯一能同时覆盖"我们的"和"库的"的那支选择器，所以 R30 的最后一道防线在这里。',
+    '',
+    '   用 0.01ms 而不是 0：某些浏览器会把 0 当作"没有声明"而继续动画，而 0.01ms 短到看不出来、又确实是声明。',
+    '   只发在 `app` 档，因为这是**元素选择器** —— 官网那份 reset 的边界（本文件头部）同样适用于它。 */',
+    '@media (prefers-reduced-motion: reduce) {',
+    '  *, *::before, *::after {',
+    '    animation-duration: 0.01ms !important;',
+    '    animation-iteration-count: 1 !important;',
+    '    transition-duration: 0.01ms !important;',
+    '    scroll-behavior: auto !important;',
+    '  }',
+    '}',
   ].join('\n')
 }
 
