@@ -20,12 +20,12 @@ importers:
       eslint:
         specifier: ^9.20.0
         version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
+      esno:
+        specifier: ^4.8.0
+        version: 4.8.0
       prettier:
         specifier: ^3.4.0
         version: 3.9.10
-      tsx:
-        specifier: ^4.19.0
-        version: 4.23.15
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
@@ -1016,6 +1016,10 @@ packages:
     peerDependenciesMeta:
       jiti:
         optional: true
+
+  esno@4.8.0:
+    resolution: {integrity: sha512-acMtooReAQGzLU0zcuEDHa8S62meh5aIyi8jboYxyvAePdmuWx2Mpwmt0xjwO0bs9/SXf+dvXJ0QJoDWw814Iw==}
+    hasBin: true
 
   espree@10.4.0:
     resolution: {integrity: sha512-j6PAQ2uUr79PZhBjP5C5fhl8e39FmRnOjsD5lGnWrFU8i2G776tBK7+nP8KuQUTTyAZUwfQqXAgrVH5MbH9CYQ==}
@@ -2455,6 +2459,10 @@ snapshots:
       jiti: 2.7.0
     transitivePeerDependencies:
       - supports-color
+
+  esno@4.8.0:
+    dependencies:
+      tsx: 4.23.15
 
   espree@10.4.0:
     dependencies:
