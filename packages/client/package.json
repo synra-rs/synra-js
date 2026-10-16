@@ -2,6 +2,7 @@
   "name": "@synra/client",
   "version": "0.0.8",
   "description": "Types for the Synra client object a plugin's UI is given. Zero runtime.",
+  "author": "imba97",
   "license": "MIT",
   "homepage": "https://github.com/synra-rs/synra-js#readme",
   "repository": {
@@ -15,6 +16,9 @@
   "type": "module",
   "sideEffects": false,
   "files": ["dist", "!dist/.tsbuildinfo"],
+  "engines": {
+    "node": ">=20.19"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts"

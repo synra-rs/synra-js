@@ -2,6 +2,7 @@
   "name": "synra",
   "version": "0.0.8",
   "description": "The aggregate type surface for Synra plugin authors. Zero runtime; usually resolved transitively.",
+  "author": "imba97",
   "license": "MIT",
   "homepage": "https://github.com/synra-rs/synra-js#readme",
   "repository": {
@@ -15,6 +16,9 @@
   "type": "module",
   "sideEffects": false,
   "files": ["dist", "!dist/.tsbuildinfo"],
+  "engines": {
+    "node": ">=20.19"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts"
