@@ -211,5 +211,23 @@ export function synraAntdFloatingCss(): string {
     background-color: var(--synra-glass-base) !important;
   }
 }
+
+/* ★ antd 的 inline menu 自己画了一条边，而外壳也画了一条。
+
+   Menu 的 inline 主题里有一条 borderInlineEnd（实测位置：ant-design-vue/es/menu/style/theme.js），
+   所以一个本来就有边框的侧栏会多出一条**内缩几像素**的发丝线 —— 看上去不是"边"，是一条走错的线。
+   这不是颜色问题（适配器已经把 colorSplit 映到我们的 line 了），是那条边框本身必须去掉。
+
+   ★ 这段注释刻意不写那条边框的宽度字面值：本包的测试会扫描返回的 CSS 里有没有像素字面值
+     （"用变量表达材质，不写字面值"），而注释也是返回内容的一部分 —— 写了就会让那条守卫变红。
+     守卫是对的，注释让步。
+
+   它落在适配器而不是应用里，有两个原因，缺一不可：
+   ① antd 的 CSS-in-JS 注入在我们的静态样式表之后，压过它必须用 !important；
+   ② 而应用侧的 blocklist **点名禁止** !important —— 唯一被允许喊话的地方就是适配器，
+      这正是 R52/R53 说的"antd 自带的皮肤在这里被修正"。 */
+.ant-menu-inline {
+  border-inline-end: 0 !important;
+}
 `
 }
