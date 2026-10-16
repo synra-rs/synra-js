@@ -1,0 +1,101 @@
+name: Release
+
+# 唯一的触发源：`v*` 标签。
+#
+# ★ **没有 push / pull_request 触发，这是有意的**：门禁只有"打标签"这一刻。
+# 代价说清楚——合进 main 的坏提交要到发布时才被发现，而那时它已经在 main 上了。
+# 要恢复 PR 侧的门禁就再加一个文件（`ci.yaml`），不是往这里加 `pull_request`：
+# 那会让"发布"和"检查"共用一次运行，而它们的权限要求不同（见下面的 id-token）。
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      # npm Trusted Publisher（OIDC）的通行证。有了它就不需要 NPM_TOKEN secret。
+      #
+      # ⚠️ npm 后台的 Trusted Publisher 里，"Workflow filename" 必须与这个文件同名：
+      # `release.yaml`（不是 `.yml`）。改了文件名就要同时改那里，否则 OIDC 校验会被拒，
+      # 而失败信息是 401，看起来像 token 过期。
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install pnpm
+        # 不写 version：版本由 package.json 的 packageManager 单一来源决定。
+        # 两处都写会得到 "Multiple versions of pnpm specified" 而直接失败。
+        uses: pnpm/action-setup@v6
+
+      - name: Set node
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: The tag matches every published version
+        # 放在装依赖之前，因为它是这里唯一一条"发出去就收不回来"的规则：
+        # 到了 registry 的版本不能撤回，只能 deprecate。版本与标签对不上时要在花钱之前停住。
+        #
+        # 判定在 `scripts/check-release-tag.ts`（纯函数 + 测试），不是一个内联脚本：
+        # 它最容易错的地方是边界（空标签、空工作区），而内联脚本没法测那几条。
+        # 标签由 Actions 经 `GITHUB_REF_NAME` 给，脚本自己去掉开头的 `v`。
+        #
+        # ★ 今天四个包共用一条版本线，所以"标签 = 每个包的版本"成立。
+        # 而设计里 `@synra/theme` 会有自己的版本线（design-docs 28 §2 R1）——
+        # 那一刻起这一步要改成"标签对上**共用那条线**的那几个包"，否则它会开始误报。
+        run: pnpm run check:release-tag
+
+      - name: The kernel is available to compare against
+        # `check-shapes.ts` 拿 TypeScript 与 Rust 逐项对照（字段名、错误码、常量）。找不到内核时它会**跳过
+        # 那些对照并说明**——于是一次绿色的运行和一次从未对照过的运行，在摘要里长得一样。
+        #
+        # ★ 它落在**仓库里面**（`<仓库>/synra-rust-core`），因为 actions/checkout 拒绝把文件放到工作区之外。
+        # 而脚本原先只找仓库**旁边**那一个，于是这段对照在 CI 里从未跑过。脚本现在两个位置都找。
+        uses: actions/checkout@v7
+        continue-on-error: true
+        with:
+          repository: synra-rs/synra-core
+          path: synra-rust-core
+
+      - name: Install Dependencies
+        # 锁文件已提交：发布构建必须可复现，所以不用 --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
+
+      - name: Check
+        # 类型、形状守卫、文档里的代码块。比单测更早发现"要发出去的东西本身是坏的"。
+        run: pnpm run check
+
+      - name: Test
+        run: pnpm run test
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: The generated protocol types are unmodified
+        # 一个被手改过的生成物，会在重新同步后变成一个 diff。这里跑的是**生成器**而不是守卫，
+        # 因为只有生成器能证明两边一致。
+        if: ${{ hashFiles('synra-rust-core/Cargo.toml') != '' }}
+        run: |
+          pnpm --filter @synra/protocol sync
+          if [ -n "$(git status --porcelain packages/protocol/src/generated)" ]; then
+            echo "::error::the generated protocol types are out of sync with the Rust crate"
+            git --no-pager diff -- packages/protocol/src/generated
+            exit 1
+          fi
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Publish to NPM
+        # 顺序由 `scripts/publish.ts` 的 `publishOrder()` 决定（依赖在前），默认只彩排：
+        # 不加 `--publish` 时它只打印顺序，因为发布不可撤回。
+        #
+        # `--provenance` 只在 CI 给：它需要 OIDC 提供方，本机带上会失败，
+        # 而本地 `--publish` 是"发到一半失败后继续"的口子，必须留着。
+        run: pnpm run publish:workspace -- --publish --provenance

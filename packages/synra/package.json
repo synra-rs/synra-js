@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "description": "The aggregate type surface for Synra plugin authors. Zero runtime; usually resolved transitively.",
   "license": "MIT",
+  "homepage": "https://github.com/synra-rs/synra-js#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synra-rs/synra-js.git",
+    "directory": "packages/synra"
+  },
+  "bugs": {
+    "url": "https://github.com/synra-rs/synra-js/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "files": ["dist"],

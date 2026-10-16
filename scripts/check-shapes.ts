@@ -34,9 +34,39 @@ import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const jsRoot = resolve(here, '..')
-const repoRoot = resolve(jsRoot, '..')
 
-const PROTOCOL_CRATE = join(repoRoot, 'synra-rust-core', 'crates', 'synra-protocol', 'src')
+/** 内核仓库的目录名。 */
+const KERNEL_DIRECTORY = 'synra-rust-core'
+
+/**
+ * 去哪儿找内核 checkout，按优先级排列。
+ *
+ * # 为什么要"找"而不是写死一个路径
+ *
+ * 与 Rust 的那些对照是**看起来通过了、其实什么都没查**的检查：找不到内核时每一项对照都被跳过，
+ * 只留下一行 warning（见下面 `rustSource === null` 那个分支）。于是一次绿色的运行和一次从未对照过的
+ * 运行，在摘要里长得一样。
+ *
+ * ★ **这一点已经漏过一次。** 本地布局是"内核在仓库**旁边**"（`../synra-rust-core`），
+ * 而 `actions/checkout` 只能把文件放进工作区**里面**——放到工作区之外会被拒绝——于是 CI 把内核放在
+ * `<仓库>/synra-rust-core`，而这里一直只找旁边那一个。**那段对照在 CI 里从未跑过。**
+ *
+ * 纯函数，便于测试（见 `check-shapes.test.ts`）：它决定的事——去哪儿找——错了不会报错，
+ * 只会让检查静默地少做。
+ */
+export function kernelCandidates(root: string, coreRoot: string | undefined): string[] {
+  return [coreRoot, join(root, '..', KERNEL_DIRECTORY), join(root, KERNEL_DIRECTORY)].filter(
+    (candidate): candidate is string => candidate !== undefined && candidate !== '',
+  )
+}
+
+/** 本次运行实际用的内核目录；一个都找不到时给一个用于报错的路径。 */
+const kernelRoot =
+  kernelCandidates(jsRoot, process.env.SYNRA_CORE_ROOT).find((candidate) => existsSync(candidate))
+  ?? join(jsRoot, '..', KERNEL_DIRECTORY)
+
+const PROTOCOL_CRATE = join(kernelRoot, 'crates', 'synra-protocol', 'src')
+const DTO_CRATE = join(kernelRoot, 'crates', 'synra-ipc', 'src', 'dto')
 
 interface Problem {
   readonly where: string
@@ -191,7 +221,7 @@ if (rustSource === null) {
     [
       `! the Rust protocol crate was not found at ${PROTOCOL_CRATE}`,
       '  the checks that compare against Rust were skipped.',
-      '  check out `synra-rust-core` beside `synra-js` to run them.',
+      '  put `synra-rust-core` beside this repository, or name the directory with SYNRA_CORE_ROOT.',
     ].join('\n'),
   )
 }
@@ -330,8 +360,8 @@ if (rustSource !== null) {
 // **内容对不对**，不是**声称对不对**。
 
 {
-  const protocolDirectory = join(jsRoot, '..', 'synra-rust-core', 'crates', 'synra-protocol', 'src')
-  const dtoDirectory = join(jsRoot, '..', 'synra-rust-core', 'crates', 'synra-ipc', 'src', 'dto')
+  const protocolDirectory = PROTOCOL_CRATE
+  const dtoDirectory = DTO_CRATE
   const generatedDir = join(jsRoot, 'packages', 'protocol', 'src', 'generated')
 
   if (!existsSync(dtoDirectory)) {
