@@ -47,6 +47,7 @@ export {
   glow,
   radius,
   themeConvention,
+  withAlpha,
   zIndex,
 } from './tokens.js'
 

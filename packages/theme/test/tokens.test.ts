@@ -12,26 +12,11 @@ import { describe, expect, it } from 'vitest'
 
 import { colors, contrastPairs, cssVariables, glass, glow, tokensCss } from '../src/index.js'
 import type { ContrastPair } from '../src/index.js'
+import { contrast } from './contrast.js'
 
 /** 解析一个对比度端点：`glassBase` 指的是玻璃的**不透明基底**，不是一支颜色。 */
 function endpoint(name: ContrastPair['foreground']): string {
   return name === 'glassBase' ? glass.base : colors[name]
-}
-
-/** WCAG 相对亮度。 */
-function luminance(hex: string): number {
-  const digits = hex.replace('#', '')
-  const channels = [0, 2, 4].map((at) => Number.parseInt(digits.slice(at, at + 2), 16) / 255)
-  const [red = 0, green = 0, blue = 0] = channels.map((channel) =>
-    channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
-  )
-  return 0.2126 * red + 0.7152 * green + 0.0722 * blue
-}
-
-/** WCAG 对比度，1:1 到 21:1。 */
-export function contrast(foreground: string, background: string): number {
-  const [lighter, darker] = [luminance(foreground), luminance(background)].sort((left, right) => right - left)
-  return ((lighter ?? 0) + 0.05) / ((darker ?? 0) + 0.05)
 }
 
 describe('cssVariables', () => {
