@@ -14,7 +14,7 @@
   },
   "type": "module",
   "sideEffects": false,
-  "files": ["dist"],
+  "files": ["dist", "!dist/.tsbuildinfo"],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts"
