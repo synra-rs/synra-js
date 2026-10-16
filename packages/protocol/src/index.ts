@@ -36,6 +36,10 @@ export type {
   PairingPrompt,
   PluginHealthDto,
   PluginSnapshot,
+  // ★ 这个 DTO 是界面**发出去**的，而这一块原本只列界面**读回来**的形状，所以它一直没在这里 ——
+  //   宿主界面要传 `devices_scan_start` 的 `opts`，却只能在自己那边手抄一份 interface，
+  //   而手抄的那份不会在 Rust 改字段时编译失败，正是"没被使用的半个契约会漂移"的另一面。
+  ScanOptions,
   ScanState,
   TransferSnapshot,
   TransferSummary,
