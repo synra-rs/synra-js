@@ -176,7 +176,11 @@ export function resumeFrom(order: readonly string[], from: string): string[] {
   const at = order.indexOf(from)
   if (at === -1) {
     const known = order.length > 0 ? order.join(', ') : '(nothing to publish)'
-    throw new OrderError(`${from} is not in the publish order, so there is nothing to resume from. The order is: ${known}`)
+    // ★ `involved` 是构造函数的第二个参数，而这里原来漏了它 —— 于是 `error.involved` 是 `undefined`。
+    //   它在两个 throw 点都漏了，而**没有任何东西会发现**：`scripts/` 不在任何构建工程里
+    //   （每包的 `tsconfig.json` 只收自己的 `src/`），而 eslint 不做类型检查。是 `tsconfig.lint.json`
+    //   这个"给 eslint 读的"工程把它露出来的。环里那个 throw 一直是对的，所以只有这两处坏了。
+    throw new OrderError(`${from} is not in the publish order, so there is nothing to resume from. The order is: ${known}`, [from])
   }
   return order.slice(at)
 }
@@ -194,7 +198,8 @@ export function fromArgument(argv: readonly string[]): string | undefined {
   }
   const value = argv[at + 1]
   if (value === undefined || value.startsWith('--')) {
-    throw new OrderError('--from needs a package name, as in `--from @synra/client`')
+    // 没有名字可以指名，所以 involved 是空的（见 `resumeFrom` 里那段说明）。
+    throw new OrderError('--from needs a package name, as in `--from @synra/client`', [])
   }
   return value
 }
