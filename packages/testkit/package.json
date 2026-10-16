@@ -1,7 +1,7 @@
 {
   "name": "@synra/testkit",
   "type": "module",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "A fake Synra client for plugin authors: run a plugin's UI without the host.",
   "author": "imba97",
   "license": "MIT",
