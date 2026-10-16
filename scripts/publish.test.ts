@@ -104,11 +104,20 @@ describe('publishOrder', () => {
     const client = order.indexOf('@synra/client')
     expect(order.indexOf('synra')).toBeLessThan(client)
     expect(order.indexOf('@synra/protocol')).toBeLessThan(client)
-    // And every package is in it, testkit last: it depends on the other three, so a release that published it first would
-    // put a package on the registry whose dependencies are not there yet. `25 §2.4` publishes testkit deliberately — it is
-    // the one package with a runtime — so "it is excluded" is not the property to check; its **position** is.
+    // And every package is in it. `25 §2.4` publishes testkit deliberately — it is the one package that
+    // carried a runtime first — so "it is excluded" is not the property to check.
     expect(order).toContain('@synra/testkit')
-    expect(order.at(-1)).toBe('@synra/testkit')
+    expect(order).toContain('@synra/theme')
+    // ★ testkit depends on the other three, so it must come **after each of them**. This used to read
+    // `expect(order.at(-1)).toBe('@synra/testkit')` — "it is last" — which held only until a package
+    // whose directory name sorts after `testkit` was added (`theme` does: `te` vs `th`). A position is
+    // not the property; the ordering against its own dependencies is.
+    for (const dependency of ['@synra/client', '@synra/protocol', 'synra']) {
+      expect(order.indexOf(dependency)).toBeLessThan(order.indexOf('@synra/testkit'))
+    }
+    // 而 theme 一条依赖边都没有，所以它的位置不受约束 —— 这也正是"它能独立发版"的机械形式：
+    // 它不 re-export 那四个包里的任何一个，那四个也不依赖它。
+    expect(packages.find(entry => entry.name === '@synra/theme')?.dependsOn).toEqual([])
   })
 })
 
