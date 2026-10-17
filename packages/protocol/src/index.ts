@@ -33,6 +33,10 @@ export type {
   IntentCandidate,
   IntentPrompt,
   IntentSnapshot,
+  // ★ The answer to `plugins_install`. Listed here for the same reason `ScanOptions` is: the shell's interface *reads*
+  // it back, and a shape only the Rust side knows is one the page has to copy by hand — a copy that does not fail to
+  // compile when the kernel adds a field.
+  InstallReport,
   PairingPrompt,
   PluginHealthDto,
   PluginSnapshot,
