@@ -187,6 +187,13 @@ export interface PluginSnapshot {
   readonly hybrid: boolean
   readonly health?: PluginHealthDto
   readonly granted: readonly string[]
+  /**
+   * 插件**声明**的能力，无论用户是否已经决定。
+   *
+   * ★ 为什么不能从 `granted` + `denied` 推导：用户回答之前两者都是空的，而同意提示要问的正是"这些"。
+   * 没有它，界面只能提供"全部允许"—— 那恰恰是逐项同意存在的理由。
+   */
+  readonly requested?: readonly string[]
   readonly denied: readonly string[]
   readonly update?: UpdateInfo
 }
@@ -266,6 +273,18 @@ export interface RemoveOptionsDto {
    * 而移除一个用户不信任的插件就不该保留。
    */
   readonly removeData: boolean
+}
+
+/** 一次安装做了什么。 */
+export interface InstallReport {
+  /** 现在装上了的插件。 */
+  readonly pluginId: string
+  /** 落盘的那个版本。 */
+  readonly version: string
+  /** 通过但带警告的检查，句子形式，界面可以直接显示。 */
+  readonly warnings?: readonly string[]
+  /** 是否已启用。从安装返回时**总是** `false`：装不等于批准。 */
+  readonly enabled: boolean
 }
 
 /** 移除做了什么。 */
