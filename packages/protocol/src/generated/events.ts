@@ -11,6 +11,7 @@
  */
 
 import type {
+  ConfigSnapshot,
   DeviceCard,
   IntentSnapshot,
   PairingPrompt,
@@ -45,6 +46,8 @@ export type KernelEvent =
   | { readonly type: 'pairingResolved'; readonly payload: { readonly requestId: RequestId } }
   | { readonly type: 'intentUpdated'; readonly payload: IntentSnapshot }
   | { readonly type: 'intentFinished'; readonly payload: { readonly intentId: IntentId } }
+  // ★ 整份快照，不是补丁：补丁是**写入方**的输入，不是结果的描述，读者若自己重放一遍就是在重算内核已知的东西。
+  | { readonly type: 'configUpdated'; readonly payload: ConfigSnapshot }
   | { readonly type: 'transferUpdated'; readonly payload: TransferSnapshot }
   | { readonly type: 'transferFinished'; readonly payload: { readonly transferId: TransferId } }
   | { readonly type: 'pluginUpdated'; readonly payload: PluginSnapshot }
