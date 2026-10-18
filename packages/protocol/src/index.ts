@@ -28,6 +28,7 @@ export type {
 // 界面之间。
 export type {
   CatalogItem,
+  CatalogSort,
   ConfigSnapshot,
   DeviceCard,
   DevicesSnapshot,
