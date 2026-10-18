@@ -292,6 +292,10 @@ export interface InstallReport {
   readonly warnings?: readonly string[]
   /** 是否已启用。从安装返回时**总是** `false`：装不等于批准。 */
   readonly enabled: boolean
+  /** 签名包的真实签名者，没有签名时缺失。 */
+  readonly publisherId?: string
+  /** 签名公钥的指纹，没有签名时缺失。 */
+  readonly fingerprint?: string
 }
 
 /** 移除做了什么。 */
