@@ -56,6 +56,8 @@ export type {
   PairingPrompt,
   PluginHealthDto,
   PluginSnapshot,
+  // ★ 卸载的报告：命令在契约里一直是 `One`，而壳返回过 `()`、界面按 `null` 读。字段照 Rust 的镜子走。
+  RemoveReport,
   // ★ 发布者列表与信任决定：页面读的状态就是这三个词，手抄一份会把 `revoked` 拼错成 `revoke` 而不报错。
   PublisherDto,
   // ★ 这个 DTO 是界面**发出去**的，而这一块原本只列界面**读回来**的形状，所以它一直没在这里 ——
