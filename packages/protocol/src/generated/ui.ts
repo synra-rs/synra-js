@@ -151,6 +151,7 @@ export interface TransferSnapshot {
 /** 插件的健康度，用于设计文档要求的透明度。 */
 export interface PluginHealthDto {
   readonly health: string
+  /** 一句解释。它是句子，不是消息键：配额层的 `explain` 返回的是稳定 crate 的散文。 */
   readonly explanation: string
   readonly callsAdmitted: number
   readonly callsRefused: number
