@@ -455,6 +455,29 @@ export interface DiagExportResult {
   readonly excluded: readonly string[]
 }
 
+/**
+ * 一次启动探针的结果。
+ *
+ * `status` 是字符串（`ok`/`warn`/`fail`）而不是观察 crate 的枚举：这是边界，一个复用枚举的 DTO 会为一格字段把
+ * `synra-observe` 拖进契约镜像。
+ */
+export interface ProbeResultDto {
+  /** 稳定的机器可读名字，例如 `tcp_port_available`。 */
+  readonly name: string
+  /** `ok`、`warn` 或 `fail`。 */
+  readonly status: string
+  /** 发现了什么。 */
+  readonly detail: string
+  /** 可以做什么，若有。 */
+  readonly suggestion?: string
+}
+
+/** 宿主跑过的全部探针，按运行顺序。 */
+export interface ProbeReportDto {
+  /** 结果。 */
+  readonly results: readonly ProbeResultDto[]
+}
+
 // ── 指标（`diag_metrics` 的答案）────────────────────────────────────────────
 //
 // ★ 这一组的来源是 `synra-observe` 的 `metrics` 目录，不是 `synra-ipc` 的 DTO：`diag_metrics` 把记录器的快照
