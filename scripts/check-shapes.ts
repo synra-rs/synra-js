@@ -67,6 +67,10 @@ const kernelRoot
 
 const PROTOCOL_CRATE = join(kernelRoot, 'crates', 'synra-protocol', 'src')
 const DTO_CRATE = join(kernelRoot, 'crates', 'synra-ipc', 'src', 'dto')
+// ★ 指标快照不住在 `synra-ipc` 里，`diag_metrics` 把 `synra-observe` 的记录器快照原样过线。不加这一行，
+// `ui.ts` 里那几个 interface 会被报成"没有同名 Rust struct" —— 那项报告本身是证据而不是失败，但一个
+// 每次都出现的假缺口会让真正的缺口混在里面。
+const METRICS_CRATE = join(kernelRoot, 'crates', 'synra-observe', 'src', 'metrics')
 
 interface Problem {
   readonly where: string
@@ -379,16 +383,16 @@ if (rustSource !== null) {
   else {
     /** `synra-ipc` 的 DTO，字段，键是 struct 名。正向检查只看这一份。 */
     const dtoFields = new Map<string, string[]>()
-    /** 两个 crate 合起来的 struct，键是 struct 名。反向检查用这一份。 */
+    /** 三个目录合起来的 struct，键是 struct 名。反向检查用这一份。 */
     const rustFields = new Map<string, string[]>()
     /**
-     * 两个 Rust 目录都要扫。
+     * 三个 Rust 目录都要扫。
      *
-     * `ui.ts` 照的是 `synra-ipc` 的 DTO，而 `wire.ts` / `events.ts` 照的是 `synra-protocol` 的线协议类型。
-     * 只扫前者会把后两个文件里每一个 interface 都报成"内核里没有同名 DTO" —— 于是检查第一次跑就红，
-     * 而一个一直红的检查等于没有检查。
+     * `ui.ts` 照的是 `synra-ipc` 的 DTO，而 `wire.ts` / `events.ts` 照的是 `synra-protocol` 的线协议类型；
+     * `ui.ts` 里的指标快照又来自 `synra-observe` 的 `metrics`。只扫第一个会把后两个文件里每一个 interface
+     * 都报成"内核里没有同名 DTO" —— 于是检查第一次跑就红，而一个一直红的检查等于没有检查。
      */
-    const rustRoots = [dtoDirectory, protocolDirectory]
+    const rustRoots = [dtoDirectory, protocolDirectory, METRICS_CRATE]
     for (const root of rustRoots) {
       if (!existsSync(root)) {
         continue

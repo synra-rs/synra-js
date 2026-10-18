@@ -32,7 +32,12 @@ export type {
   ConfigSnapshot,
   DeviceCard,
   DevicesSnapshot,
+  // ★ 指标快照由 `diag_metrics` 原样过线，来源是 `synra-observe` 的 `metrics` 而不是 `synra-ipc` 的 DTO；
+  //   放在这里是因为它和别的宿主形状一样是**界面读回来的**，而界面手抄一份就不会在 Rust 改字段时编译失败。
+  HistogramSnapshot,
   IdentitySnapshot,
+  // ★ 确认框在下载之前读它：权限列表与发布者声明都来自这一份，界面不再手抄一个 interface。
+  InstallPreviewDto,
   // ★ The answer to `plugins_install`. Listed here for the same reason `ScanOptions` is: the shell's interface *reads*
   // it back, and a shape only the Rust side knows is one the page has to copy by hand — a copy that does not fail to
   // compile when the kernel adds a field.
@@ -40,14 +45,20 @@ export type {
   IntentCandidate,
   IntentPrompt,
   IntentSnapshot,
+  MetricsSnapshot,
+  MetricValue,
   PairingPrompt,
   PluginHealthDto,
   PluginSnapshot,
+  // ★ 发布者列表与信任决定：页面读的状态就是这三个词，手抄一份会把 `revoked` 拼错成 `revoke` 而不报错。
+  PublisherDto,
   // ★ 这个 DTO 是界面**发出去**的，而这一块原本只列界面**读回来**的形状，所以它一直没在这里 ——
   //   宿主界面要传 `devices_scan_start` 的 `opts`，却只能在自己那边手抄一份 interface，
   //   而手抄的那份不会在 Rust 改字段时编译失败，正是"没被使用的半个契约会漂移"的另一面。
   ScanOptions,
   ScanState,
+  SeriesKey,
+  SeriesValue,
   SyncFailure,
   SyncPlanDto,
   SyncReport,
