@@ -261,6 +261,9 @@ export interface CatalogItem {
   readonly installed: boolean
 }
 
+/** 目录结果的排序方式；只有搜索端点能兑现的两种。 */
+export type CatalogSort = 'relevance' | 'name'
+
 /** 目录搜索。 */
 export interface CatalogQuery {
   /** 搜索词。 */
@@ -269,6 +272,10 @@ export interface CatalogQuery {
   readonly registry?: string
   /** 最多几条。内核会截断。 */
   readonly limit?: number
+  /** 跳过几条，用于翻页。 */
+  readonly offset?: number
+  /** 结果顺序：`relevance` 是 registry 自己的顺序，`name` 按名称排。 */
+  readonly sort?: CatalogSort
 }
 
 /** 移除插件时选了什么。 */
