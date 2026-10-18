@@ -123,6 +123,12 @@ export interface IntentPrompt {
 /** 一个意图走到了哪里。 */
 export interface IntentSnapshot {
   readonly intentId: string
+  /**
+   * 这次动作所有步骤共同的 trace。
+   *
+   * ★ 板一直带着它，快照却把它丢了 —— 用户唯一能粘进 `synra logs --trace` 的标识，界面反而看不见。
+   */
+  readonly traceId: string
   readonly state: string
   readonly pluginId?: string
   readonly candidates: readonly IntentCandidate[]
