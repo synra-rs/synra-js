@@ -46,6 +46,10 @@ export type {
   //   而手抄的那份不会在 Rust 改字段时编译失败，正是"没被使用的半个契约会漂移"的另一面。
   ScanOptions,
   ScanState,
+  SyncFailure,
+  SyncPlanDto,
+  SyncReport,
+  SyncTarget,
   TransferSnapshot,
   TransferSummary,
   UpdateInfo,
