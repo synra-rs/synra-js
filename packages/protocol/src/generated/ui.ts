@@ -172,6 +172,13 @@ export interface UpdateInfo {
 /** 一个插件，作为列表里的一张卡片。 */
 export interface PluginSnapshot {
   readonly pluginId: string
+  /**
+   * 这个插件自己的数据目录。
+   *
+   * ★ 一个路径而不是布尔值：卸载对话框有两个结果，其中一个会删掉这个目录，所以用户在同意之前有权看见它。
+   * 壳用 `Paths::plugin_sandbox_dir` 构造它 —— 与卸载本身同一个函数，否则“数据在哪”会有两个答案。
+   */
+  readonly dataPath: string
   readonly title: string
   readonly description?: string
   readonly version: string
