@@ -441,6 +441,20 @@ export interface DiagExportOptions {
   readonly logLines?: number
 }
 
+/**
+ * 诊断包写到了哪里，以及它装了什么。
+ *
+ * `included` 与 `excluded` 是同意页要读回来的那两半：只给一个路径的话，用户没法在把文件发出去之前看到里面有什么。
+ */
+export interface DiagExportResult {
+  /** 写出的文件。 */
+  readonly path: string
+  /** 它包含的章节。 */
+  readonly included: readonly string[]
+  /** 被略过的章节与原因。 */
+  readonly excluded: readonly string[]
+}
+
 // ── 指标（`diag_metrics` 的答案）────────────────────────────────────────────
 //
 // ★ 这一组的来源是 `synra-observe` 的 `metrics` 目录，不是 `synra-ipc` 的 DTO：`diag_metrics` 把记录器的快照
