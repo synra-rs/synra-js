@@ -2,8 +2,8 @@
 /**
  * 宿主界面看到的形状 —— **手写镜像，由脚本核对**。
  *
- * 来源：synra-rust-core/crates/synra-ipc/src/dto/*.rs
- * 核对：synra-rust-app/scripts/check-shapes.ts 的 `dto-coverage` 检查
+ * 来源：synra-rust-core/crates/synra-ipc/src/dto/*.rs，外加 `synra-observe/src/metrics`（指标快照）
+ * 核对：synra-js/scripts/check-shapes.ts 的 `dto-coverage` 检查
  *
  * ★ 这个文件曾经声称是自动生成的，并给出 `cargo test -p synra-ipc --features ts-export` 这条命令。
  * 那条命令不存在：synra-ipc 没有 `[features]` 段，`ts_export.rs` 只生成 `ErrorCode` 和
@@ -242,6 +242,20 @@ export interface ScanOptions {
   readonly cachedOnly: boolean
 }
 
+/** 一个本机见过其签名的发布者。 */
+export interface PublisherDto {
+  /** 发布者自己的标识，来自它的签名。 */
+  readonly publisherId: string
+  /** 钥匙指纹，按人读的方式分组。 */
+  readonly fingerprint: string
+  /** `seen`、`trusted` 或 `revoked`。 */
+  readonly trust: string
+  /** 第一次见到这个钥匙的签名是什么时候。 */
+  readonly firstSeenMs: number
+  /** 用户做过决定的话，是什么时候。 */
+  readonly decidedMs?: number
+}
+
 /** 目录里的一条搜索结果。 */
 export interface CatalogItem {
   readonly pluginId: string
@@ -276,6 +290,30 @@ export interface CatalogQuery {
   readonly offset?: number
   /** 结果顺序：`relevance` 是 registry 自己的顺序，`name` 按名称排。 */
   readonly sort?: CatalogSort
+}
+
+/** 一个 registry 包在下载任何字节之前会装成什么。 */
+export interface InstallPreviewDto {
+  readonly pluginId: string
+  readonly version: string
+  readonly title: string
+  readonly description?: string
+  readonly publisher: string
+  readonly publisherName?: string
+  /**
+   * 静态目录声称的发布者钥匙指纹。
+   *
+   * ★ 是目录的**声明**，不是验证：签名在下载下来的字节上校验，这个字段给确认框第二份可对照的说法。
+   */
+  readonly publisherKey?: string
+  /** 它要求被允许什么，按 manifest 的拼写。 */
+  readonly capabilities: readonly string[]
+  /** 是否没有界面也能跑。 */
+  readonly headless: boolean
+  /** 是否给界面加页面。 */
+  readonly hasUi: boolean
+  /** 发布者声称的体积，字节。 */
+  readonly sizeBytes?: number
 }
 
 /** 移除插件时选了什么。 */
@@ -401,4 +439,64 @@ export interface DiagExportOptions {
   readonly includeDebugLogs: boolean
   /** 带多少行日志。 */
   readonly logLines?: number
+}
+
+// ── 指标（`diag_metrics` 的答案）────────────────────────────────────────────
+//
+// ★ 这一组的来源是 `synra-observe` 的 `metrics` 目录，不是 `synra-ipc` 的 DTO：`diag_metrics` 把记录器的快照
+// 原样过线。`scripts/check-shapes.ts` 的 `dto-coverage` 因此把那个目录也纳入扫描，否则下面几个 interface 会被
+// 报成"没有同名 Rust struct"，而一项总在报警的检查等于没有检查。
+
+/**
+ * 一个直方图的累计分布。
+ *
+ * `bounds[i]` 是第 `i` 个桶的上界，`buckets[i]` 是落进去的观测数；最后一个桶没有上界
+ * （Rust 那边渲染成 `f64::INFINITY`，这里不发明一个数字）。
+ */
+export interface HistogramSnapshot {
+  /** 上界，升序。 */
+  readonly bounds: readonly number[]
+  /** 每个上界一个计数，另加一个开区间的顶桶。 */
+  readonly buckets: readonly number[]
+  /** 观测次数。 */
+  readonly count: number
+  /** 观测值之和。 */
+  readonly sum: number
+}
+
+/** 指标的身份：名字与标签对。JSON 里标签是 `[key, value]` 二元数组，已按 key 排序。 */
+export interface SeriesKey {
+  /** 指标名。 */
+  readonly name: string
+  /** 标签对。 */
+  readonly labels: readonly (readonly [string, string])[]
+}
+
+/**
+ * 一条指标的值。
+ *
+ * ★ 带 tag 的联合而不是一个数字：100 次调用与一段 100 毫秒的直方图在数字上可以相同，而读的人需要知道
+ * 自己看的是哪一个。tag 与内核 `Value` 的 serde 形状一致（`kind` + `value`）。
+ */
+export type MetricValue =
+  | { readonly kind: 'counter', readonly value: number }
+  | { readonly kind: 'gauge', readonly value: number }
+  | { readonly kind: 'histogram', readonly value: HistogramSnapshot }
+
+/** 一条序列：键与值。 */
+export interface SeriesValue {
+  /** 指标身份。 */
+  readonly key: SeriesKey
+  /** 它的值。 */
+  readonly value: MetricValue
+}
+
+/** 一个记录器的全部状态。 */
+export interface MetricsSnapshot {
+  /** 全部序列，按渲染后的键排序。 */
+  readonly values: readonly SeriesValue[]
+  /** 有多少次观测被折进了 overflow 序列。 */
+  readonly overflowedTotal: number
+  /** 生效的每指标序列上限，读的人据此判断快照是否完整。 */
+  readonly maxSeriesPerMetric: number
 }
