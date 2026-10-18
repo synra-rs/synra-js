@@ -35,6 +35,9 @@ export type {
   // ★ 诊断包的两个形状：同意页写选项、读结果。它们以前只存在于壳的 `commands::diag`，页面只能手抄。
   DiagExportOptions,
   DiagExportResult,
+  // ★ 探针报告也是界面读回来的宿主形状：写在契约里，镜像才有人比对。
+  ProbeReportDto,
+  ProbeResultDto,
   // ★ 指标快照由 `diag_metrics` 原样过线，来源是 `synra-observe` 的 `metrics` 而不是 `synra-ipc` 的 DTO；
   //   放在这里是因为它和别的宿主形状一样是**界面读回来的**，而界面手抄一份就不会在 Rust 改字段时编译失败。
   HistogramSnapshot,
