@@ -31,13 +31,13 @@ export type {
   DeviceCard,
   DevicesSnapshot,
   IdentitySnapshot,
-  IntentCandidate,
-  IntentPrompt,
-  IntentSnapshot,
   // ★ The answer to `plugins_install`. Listed here for the same reason `ScanOptions` is: the shell's interface *reads*
   // it back, and a shape only the Rust side knows is one the page has to copy by hand — a copy that does not fail to
   // compile when the kernel adds a field.
   InstallReport,
+  IntentCandidate,
+  IntentPrompt,
+  IntentSnapshot,
   PairingPrompt,
   PluginHealthDto,
   PluginSnapshot,
@@ -53,7 +53,8 @@ export type {
 
 export type {
   // 身份
-  DeviceId,  DigestAlgorithm,
+  DeviceId,
+  DigestAlgorithm,
   // 信封
   Envelope,
   // 错误
