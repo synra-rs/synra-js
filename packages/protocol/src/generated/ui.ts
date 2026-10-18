@@ -185,6 +185,13 @@ export interface PluginSnapshot {
    */
   readonly state: string
   readonly hybrid: boolean
+  /**
+   * 它是否有一页自己的界面。
+   *
+   * ★ 与 `hybrid` 不是同一件事：只有 UI 的插件有页面、没有 headless 半，而打开它正是 `plugin_ui_open` 能做的事。
+   * 卡片需要这两个事实**分开**，否则唯一"有页面但没有 Wasm"的形态会没有入口。
+   */
+  readonly hasUi: boolean
   readonly health?: PluginHealthDto
   readonly granted: readonly string[]
   /**
