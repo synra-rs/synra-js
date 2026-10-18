@@ -27,6 +27,7 @@ export type {
 // 宿主界面的形状与内核推给它的增量事件。与 `wire` 分开：那里是设备之间的协议，这里是内核与自己的
 // 界面之间。
 export type {
+  CatalogItem,
   ConfigSnapshot,
   DeviceCard,
   DevicesSnapshot,
