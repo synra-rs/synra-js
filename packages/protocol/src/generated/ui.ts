@@ -559,3 +559,26 @@ export interface MetricsSnapshot {
   /** 生效的每指标序列上限，读的人据此判断快照是否完整。 */
   readonly maxSeriesPerMetric: number
 }
+
+/**
+ * 一次崩溃，来自 `synra_observe::crash::CrashReport`。
+ *
+ * ★ 与 `MetricsSnapshot` 一样直接镜像 observe 的类型，而不是在 `synra-ipc` 里再包一层：它是诊断数据，
+ * 没有要稳定的边界形状，多一层 DTO 只会多一个要同步的副本。
+ */
+export interface CrashReport {
+  /** 崩溃发生的时刻（epoch 毫秒）。 */
+  readonly atMs: number
+  /** 崩溃时的应用版本。 */
+  readonly version: string
+  /** `file:line:column`，安全模式按它计重复次数；没有位置的报告不参与计数。 */
+  readonly location?: string
+  /** panic 的消息，若它是字符串。 */
+  readonly message?: string
+  /** 线程名，若有。 */
+  readonly thread?: string
+  /** 捕获的 backtrace。 */
+  readonly backtrace?: string
+  /** 崩溃时正在进行的 trace；维护者据此在日志里找步骤。 */
+  readonly traceId?: string
+}
