@@ -154,7 +154,24 @@ export interface TransferSnapshot {
   readonly startedAtMs: number
 }
 
-/** 插件的健康度，用于设计文档要求的透明度。 */
+/**
+ * 已经落在收件箱里的一个文件。
+ *
+ * ★ 与在飞的 `TransferSnapshot` 不是一回事：传输结束后行就没了，文件还在。它从 inbox 目录读，而不是从表里读——
+ * 表活过文件会让用户去打开一个不存在的路径。
+ */
+export interface ReceivedFile {
+  /** 落盘时的名字。 */
+  readonly fileName: string
+  /** 落点，用户可以据此打开它。 */
+  readonly path: string
+  /** 字节数。 */
+  readonly bytes: number
+  /** 最后写入时刻，epoch 毫秒。 */
+  readonly receivedAtMs: number
+}
+
+/** 插件健康度，用于设计文档要求的透明度。 */
 export interface PluginHealthDto {
   readonly health: string
   /** 一句解释。它是句子，不是消息键：配额层的 `explain` 返回的是稳定 crate 的散文。 */
