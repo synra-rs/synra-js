@@ -122,10 +122,10 @@ export interface IntentPrompt {
 
 /** 一个意图走到了哪里。 */
 /** 一个 IPC 拒绝：稳定的 code、可翻译的 message key，以及可选的参数与建议动作。 */
-import type { SuggestedAction } from './wire'
+import type { ErrorCode, SuggestedAction } from './wire'
 
 export interface IpcError {
-  readonly code: string
+  readonly code: ErrorCode
   readonly message: string
   readonly params?: unknown
   readonly details?: unknown
