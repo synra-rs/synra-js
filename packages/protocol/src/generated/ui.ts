@@ -121,6 +121,18 @@ export interface IntentPrompt {
 }
 
 /** 一个意图走到了哪里。 */
+/** 一个 IPC 拒绝：稳定的 code、可翻译的 message key，以及可选的参数与建议动作。 */
+import type { SuggestedAction } from './wire'
+
+export interface IpcError {
+  readonly code: string
+  readonly message: string
+  readonly params?: unknown
+  readonly details?: unknown
+  readonly retryable: boolean
+  readonly actions?: readonly SuggestedAction[]
+}
+
 export interface IntentSnapshot {
   readonly intentId: string
   /**
@@ -133,7 +145,7 @@ export interface IntentSnapshot {
   readonly pluginId?: string
   readonly candidates: readonly IntentCandidate[]
   readonly prompt?: IntentPrompt
-  readonly error?: unknown
+  readonly error?: IpcError
   readonly startedAtMs: number
 }
 
