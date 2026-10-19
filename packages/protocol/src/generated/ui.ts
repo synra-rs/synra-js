@@ -198,6 +198,14 @@ export interface PluginSnapshot {
    * 状态，在界面里推导意味着同一条规则有两份实现。
    */
   readonly state: string
+  /**
+   * 它为什么没有在运行，当状态词说不出原因时。
+   *
+   * ★ 状态词说的是**什么**（`unavailable`/`unreadable`），这里说的是**为什么**，用的是做决定的层自己的句子。
+   * 安全模式是催生这个字段的场景：崩溃循环之后宿主决定一个插件都不启动，所有插件都是 `unavailable`，
+   * 而只被告知 `unavailable` 的用户会去找一个坏插件，而不是去看那段崩溃。
+   */
+  readonly stateReason?: string
   readonly hybrid: boolean
   /**
    * 它是否有一页自己的界面。
