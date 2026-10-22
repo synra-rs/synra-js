@@ -146,7 +146,20 @@ export interface IntentSnapshot {
   readonly candidates: readonly IntentCandidate[]
   readonly prompt?: IntentPrompt
   readonly error?: IpcError
+  /** 这个设备正在为“没人回答的 dispatch”重试到什么程度；第一次失败之前没有。 */
+  readonly retry?: IntentRetry
   readonly startedAtMs: number
+}
+
+/**
+ * 重试的进度。
+ *
+ * ★ `gaveUp` 为真时意图仍是 `dispatching`：放弃的是**这个进程的努力**，不是动作的结果。
+ */
+export interface IntentRetry {
+  readonly attempts: number
+  readonly maxAttempts: number
+  readonly gaveUp: boolean
 }
 
 /** 一次传输，作为列表里的一行。 */
