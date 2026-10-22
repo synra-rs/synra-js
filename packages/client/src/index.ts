@@ -57,6 +57,9 @@ export type {
   TransferProgress,
   TransferStatus,
   Unsubscribe,
+  // 渐进增强的引擎探测
+  WebviewInfo,
+  WebviewKind,
 } from './surface'
 
 export type {
