@@ -30,14 +30,13 @@ export type {
   CatalogItem,
   CatalogSort,
   ConfigSnapshot,
+  // ★ 崩溃报告：与 `MetricsSnapshot` 一样直接镜 observe 的类型。设置页的“查看详情”读它，手抄会在 Rust 加字段时漂移。
+  CrashReport,
   DeviceCard,
   DevicesSnapshot,
   // ★ 诊断包的两个形状：同意页写选项、读结果。它们以前只存在于壳的 `commands::diag`，页面只能手抄。
   DiagExportOptions,
   DiagExportResult,
-  // ★ 探针报告也是界面读回来的宿主形状：写在契约里，镜像才有人比对。
-  ProbeReportDto,
-  ProbeResultDto,
   // ★ 指标快照由 `diag_metrics` 原样过线，来源是 `synra-observe` 的 `metrics` 而不是 `synra-ipc` 的 DTO；
   //   放在这里是因为它和别的宿主形状一样是**界面读回来的**，而界面手抄一份就不会在 Rust 改字段时编译失败。
   HistogramSnapshot,
@@ -53,19 +52,20 @@ export type {
   IntentRetry,
   IntentSnapshot,
   IpcError,
-  // ★ 崩溃报告：与 `MetricsSnapshot` 一样直接镜 observe 的类型。设置页的“查看详情”读它，手抄会在 Rust 加字段时漂移。
-  CrashReport,
   MetricsSnapshot,
   MetricValue,
   PairingPrompt,
   PluginHealthDto,
   PluginSnapshot,
+  // ★ 探针报告也是界面读回来的宿主形状：写在契约里，镜像才有人比对。
+  ProbeReportDto,
+  ProbeResultDto,
+  // ★ 发布者列表与信任决定：页面读的状态就是这三个词，手抄一份会把 `revoked` 拼错成 `revoke` 而不报错。
+  PublisherDto,
   // ★ 收件箱里的历史：与在飞的传输分开，因为传输结束后行会消失而文件还在。
   ReceivedFile,
   // ★ 卸载的报告：命令在契约里一直是 `One`，而壳返回过 `()`、界面按 `null` 读。字段照 Rust 的镜子走。
   RemoveReport,
-  // ★ 发布者列表与信任决定：页面读的状态就是这三个词，手抄一份会把 `revoked` 拼错成 `revoke` 而不报错。
-  PublisherDto,
   // ★ 这个 DTO 是界面**发出去**的，而这一块原本只列界面**读回来**的形状，所以它一直没在这里 ——
   //   宿主界面要传 `devices_scan_start` 的 `opts`，却只能在自己那边手抄一份 interface，
   //   而手抄的那份不会在 Rust 改字段时编译失败，正是"没被使用的半个契约会漂移"的另一面。

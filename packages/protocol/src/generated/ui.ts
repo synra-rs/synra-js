@@ -271,6 +271,8 @@ export interface PluginSnapshot {
   readonly requested?: readonly string[]
   readonly denied: readonly string[]
   readonly update?: UpdateInfo
+  /** Last successful check of this installed version, as epoch milliseconds. */
+  readonly updateCheckedAtMs?: number
 }
 
 /** 配置的当前状态。 */
