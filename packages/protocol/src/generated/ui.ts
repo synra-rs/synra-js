@@ -210,6 +210,8 @@ export interface PluginHealthDto {
 
 /** 一个可用的更新。 */
 export interface UpdateInfo {
+  /** 这条更新属于哪个插件。 */
+  readonly pluginId: string
   readonly version: string
   /**
    * 它的 manifest 是否要了当前版本没要的东西。
