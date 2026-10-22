@@ -160,6 +160,8 @@ export interface IntentRetry {
   readonly attempts: number
   readonly maxAttempts: number
   readonly gaveUp: boolean
+  /** 下一次尝试的时间（epoch 毫秒）；没有排期时缺席。 */
+  readonly nextAtMs?: number
 }
 
 /** 一次传输，作为列表里的一行。 */
