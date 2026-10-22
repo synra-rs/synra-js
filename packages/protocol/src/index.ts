@@ -50,6 +50,7 @@ export type {
   InstallReport,
   IntentCandidate,
   IntentPrompt,
+  IntentRetry,
   IntentSnapshot,
   IpcError,
   // ★ 崩溃报告：与 `MetricsSnapshot` 一样直接镜 observe 的类型。设置页的“查看详情”读它，手抄会在 Rust 加字段时漂移。
