@@ -69,6 +69,29 @@ export type {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Which engine renders a plugin page.
+ *
+ * ★ Progressive enhancement only. The design's rule is that a page must work on the weakest engine it supports; this is
+ * for the places where a nicer effect is optional, never for whether the page functions at all. A plugin that treats
+ * `unknown` as "modern" is a plugin that will break on the next engine.
+ */
+export type WebviewKind = 'webview2' | 'wkwebview' | 'webkitgtk' | 'android-webview' | 'unknown'
+
+/** The engine, and its version when the user agent reports one. */
+export interface WebviewInfo {
+  /** Which engine. */
+  kind: WebviewKind
+  /**
+   * The engine version, or `null` when the engine does not put one in the user agent.
+   *
+   * ★ `null` rather than a guess. WebKitGTK, for instance, reports an `AppleWebKit/…` token that is the WebKit version
+   * rather than the GTK engine's, and calling that "the version" would make a comparison against a minimum silently
+   * wrong.
+   */
+  version: string | null
+}
+
+/**
  * 环境信息与两个"能不能"。
  *
  * ★ 三个"能不能"的语义**不同**，混用会让按钮的禁用条件写错：
@@ -93,6 +116,8 @@ export interface EnvNamespace {
   appVersion(): string
   /** 插件 SDK 版本。 */
   sdkVersion(): string
+  /** 渲染这个页面的 WebView 引擎，以及它报告的版本。只用于渐进增强。 */
+  webview(): WebviewInfo
   /** 宿主**平台**是否支持该能力。与 `can()` 不是一回事。 */
   platformSupports(capability: PlatformCapability): boolean
   /** 宿主**版本**是否实现了某个客户端方法。同步，所以渲染时就能判断。 */

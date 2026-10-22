@@ -37,6 +37,7 @@ import type {
   TransferProgress,
   TransferStatus,
   Unsubscribe,
+  WebviewInfo,
 } from '@synra/client'
 import type { DeviceId, ErrorCode, PluginId, TransferId } from '@synra/protocol'
 
@@ -76,6 +77,8 @@ export interface MockOptions {
     readonly darkMode?: boolean
     readonly appVersion?: string
     readonly sdkVersion?: string
+    /** 渲染页面的引擎；默认 `unknown`，因为一个不知道自己在哪的 mock 不该自称现代引擎。 */
+    readonly webview?: WebviewInfo
   }
   /** 插件自己的 name，用于 `self.invoke` 的默认行为。 */
   readonly pluginId?: PluginId
@@ -253,6 +256,9 @@ export class MockSynraClient implements SynraClient {
     darkMode: (): boolean => this.options.env?.darkMode ?? false,
     appVersion: (): string => this.options.env?.appVersion ?? '0.0.0-mock',
     sdkVersion: (): string => this.options.env?.sdkVersion ?? '0.1.0',
+    // ★ `unknown` rather than the host's `linux`: a mock that named an engine would make "works everywhere" a claim the
+    // author never tested. The default is the answer that cannot be wrong.
+    webview: (): WebviewInfo => this.options.env?.webview ?? { kind: 'unknown', version: null },
     platformSupports: (capability: PlatformCapability): boolean => {
       this.record('env', 'platformSupports', [capability], null)
       return this.platformCapabilities.has(capability)
