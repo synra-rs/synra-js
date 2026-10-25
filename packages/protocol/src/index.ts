@@ -16,6 +16,8 @@
  * `synra.device.list()` 返回的是 `DeviceTarget`，后者是给作者的友好视图。
  */
 
+export type { CredentialCleanupReport, CredentialEnrollment, CredentialRepairReport, CredentialSnapshot } from './generated/credentials'
+
 export type {
   EventVerdict,
   KernelEvent,

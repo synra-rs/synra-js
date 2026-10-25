@@ -32,7 +32,7 @@ import { dirname, join, resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { pairingShapeProblems } from './pairing-shapes'
+import { pairingShapeProblems, requiredRecordProblems } from './pairing-shapes'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const jsRoot = resolve(here, '..')
@@ -122,6 +122,10 @@ const RUST_CONVENTIONS: Record<string, string | null> = {
   PairRefusal: 'snake_case',
   PairingPhase: 'camelCase',
   PairingSnapshot: 'camelCase',
+  CredentialEnrollment: 'camelCase',
+  CredentialSnapshot: 'camelCase',
+  CredentialCleanupReport: 'camelCase',
+  CredentialRepairReport: 'camelCase',
   IntentDisplay: 'camelCase',
   IntentInvocation: 'camelCase',
   IntentOutcome: 'camelCase',
@@ -260,6 +264,11 @@ if (rustSource !== null) {
   evidence.push(`${String(checked)} naming conventions checked against Rust`)
   for (const problem of pairingShapeProblems(rustSource, read(join(jsRoot, 'packages/protocol/src/generated/ui.ts'))))
     fail('pairing-contract', problem)
+  const credentials = read(join(jsRoot, 'packages/protocol/src/generated/credentials.ts'))
+  for (const name of ['CredentialEnrollment', 'CredentialSnapshot', 'CredentialCleanupReport', 'CredentialRepairReport']) {
+    for (const problem of requiredRecordProblems(rustSource, credentials, name))
+      fail('credential-contract', problem)
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
