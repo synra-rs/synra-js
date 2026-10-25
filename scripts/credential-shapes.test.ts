@@ -19,7 +19,7 @@ if (rust === undefined)
 const ts = readFileSync('packages/protocol/src/generated/credentials.ts', 'utf8')
 
 it('compares the actual required nullable maintenance records', () => {
-  for (const name of ['CredentialEnrollment', 'CredentialSnapshot', 'CredentialCleanupReport', 'CredentialRepairReport'])
+  for (const name of ['CredentialEnrollment', 'CredentialRecovery', 'CredentialSnapshot', 'CredentialCleanupReport', 'CredentialRepairReport'])
     expect(requiredRecordProblems(rust, ts, name)).toEqual([])
 })
 
@@ -31,6 +31,8 @@ it('refuses a field that starts omitting null values', () => {
 
 it.each([
   ['CredentialSnapshot', 'enrollment: CredentialEnrollment | null', 'enrollment?: CredentialEnrollment'],
+  ['CredentialSnapshot', 'recovery: CredentialRecovery | null', 'recovery?: CredentialRecovery'],
+  ['CredentialRecovery', 'fingerprint: string', 'fingerprint: number'],
   ['CredentialCleanupReport', 'remaining: number | null', 'remaining: number'],
   ['CredentialRepairReport', 'restartRequired: boolean', 'restartRequired: string'],
 ])('detects nullable optional and primitive type drift in %s', (name, from, to) => {
