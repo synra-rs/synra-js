@@ -48,5 +48,5 @@ function rustType(value: string): string | undefined {
     const inner = rustType(optional)
     return inner === undefined ? undefined : `${inner} | null`
   }
-  return ({ 'RequestId': 'string', 'DeviceId': 'string', 'String': 'string', 'i64': 'number', 'PairingPhase': 'PairingPhase', 'crate::ErrorCode': 'ErrorCode', 'ErrorCode': 'ErrorCode', 'u32': 'number', 'bool': 'boolean', 'CredentialEnrollment': 'CredentialEnrollment', 'CredentialCleanupReport': 'CredentialCleanupReport' } as Record<string, string>)[value]
+  return ({ 'RequestId': 'string', 'DeviceId': 'string', 'String': 'string', 'i64': 'number', 'PairingPhase': 'PairingPhase', 'crate::ErrorCode': 'ErrorCode', 'ErrorCode': 'ErrorCode', 'u32': 'number', 'bool': 'boolean', 'CredentialEnrollment': 'CredentialEnrollment', 'CredentialRecovery': 'CredentialRecovery', 'CredentialCleanupReport': 'CredentialCleanupReport' } as Record<string, string>)[value]
 }

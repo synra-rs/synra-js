@@ -123,6 +123,7 @@ const RUST_CONVENTIONS: Record<string, string | null> = {
   PairingPhase: 'camelCase',
   PairingSnapshot: 'camelCase',
   CredentialEnrollment: 'camelCase',
+  CredentialRecovery: 'camelCase',
   CredentialSnapshot: 'camelCase',
   CredentialCleanupReport: 'camelCase',
   CredentialRepairReport: 'camelCase',
@@ -265,7 +266,7 @@ if (rustSource !== null) {
   for (const problem of pairingShapeProblems(rustSource, read(join(jsRoot, 'packages/protocol/src/generated/ui.ts'))))
     fail('pairing-contract', problem)
   const credentials = read(join(jsRoot, 'packages/protocol/src/generated/credentials.ts'))
-  for (const name of ['CredentialEnrollment', 'CredentialSnapshot', 'CredentialCleanupReport', 'CredentialRepairReport']) {
+  for (const name of ['CredentialEnrollment', 'CredentialRecovery', 'CredentialSnapshot', 'CredentialCleanupReport', 'CredentialRepairReport']) {
     for (const problem of requiredRecordProblems(rustSource, credentials, name))
       fail('credential-contract', problem)
   }
