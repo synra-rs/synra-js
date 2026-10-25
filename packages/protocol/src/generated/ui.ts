@@ -89,20 +89,19 @@ export interface ScanState {
   readonly found: number
 }
 
-/** 等待决定的配对请求。 */
-export interface PairingPrompt {
+/** Shared restricted first-pairing runtime phases; these never grant authorization. */
+export type PairingPhase = 'listening' | 'connecting' | 'confirming' | 'cancelling'
+  | 'paired' | 'cancelled' | 'timedOut' | 'failed'
+
+/** Public task snapshot from synra-protocol/src/pairing.rs; Option fields serialize as null. */
+export interface PairingSnapshot {
   readonly requestId: string
-  readonly deviceId: string
-  readonly displayName: string
-  readonly platform: string
-  readonly address: string
-  /**
-   * 两侧显示的校验码，供用户比对。
-   *
-   * 提示的全部意义所在：这个比对是阻止同网段另一台设备冒名配对的东西。
-   */
-  readonly verificationCode: string
+  readonly peerId: string
+  readonly phase: PairingPhase
   readonly expiresAtMs: number
+  readonly reply: string | null
+  readonly errorCode: import('./wire').ErrorCode | null
+  readonly detail: string | null
 }
 
 /** 一个意图可能被怎么处理。 */

@@ -54,7 +54,8 @@ export type {
   IpcError,
   MetricsSnapshot,
   MetricValue,
-  PairingPrompt,
+  PairingPhase,
+  PairingSnapshot,
   PluginHealthDto,
   PluginSnapshot,
   // ★ 探针报告也是界面读回来的宿主形状：写在契约里，镜像才有人比对。
