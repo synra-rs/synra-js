@@ -32,6 +32,8 @@ import { dirname, join, resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
+import { pairingShapeProblems } from './pairing-shapes'
+
 const here = dirname(fileURLToPath(import.meta.url))
 const jsRoot = resolve(here, '..')
 
@@ -118,6 +120,8 @@ const RUST_CONVENTIONS: Record<string, string | null> = {
   // 会话
   PlatformKind: 'snake_case',
   PairRefusal: 'snake_case',
+  PairingPhase: 'camelCase',
+  PairingSnapshot: 'camelCase',
   IntentDisplay: 'camelCase',
   IntentInvocation: 'camelCase',
   IntentOutcome: 'camelCase',
@@ -254,6 +258,8 @@ if (rustSource !== null) {
     }
   }
   evidence.push(`${String(checked)} naming conventions checked against Rust`)
+  for (const problem of pairingShapeProblems(rustSource, read(join(jsRoot, 'packages/protocol/src/generated/ui.ts'))))
+    fail('pairing-contract', problem)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
