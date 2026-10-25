@@ -10,21 +10,29 @@ export function pairingShapeProblems(rust: string, ts: string): string[] {
   if (expected.length === 0 || JSON.stringify(expected) !== JSON.stringify(actual))
     problems.push('PairingPhase variants differ')
 
-  const rustFields = /pub struct PairingSnapshot\s*\{([\s\S]*?)\n\}/.exec(rust)?.[1]
-  const tsFields = /export interface PairingSnapshot\s*\{([\s\S]*?)\n\}/.exec(ts)?.[1]
+  return [...problems, ...requiredRecordProblems(rust, ts, 'PairingSnapshot')]
+}
+
+/** Required nullable fields follow the actual Rust type; skipped Option fields are not supported here. */
+export function requiredRecordProblems(rust: string, ts: string, name: string): string[] {
+  const problems: string[] = []
+  const rustFields = new RegExp(`pub struct ${name}\\s*\\{([\\s\\S]*?)\\n\\}`).exec(rust)?.[1]
+  const tsFields = new RegExp(`export interface ${name}\\s*\\{([\\s\\S]*?)\\n\\}`).exec(ts)?.[1]
   if (rustFields === undefined || tsFields === undefined)
-    return [...problems, 'PairingSnapshot could not be read on both sides']
+    return [`${name} could not be read on both sides`]
+  if (/#\[serde\(/.test(rustFields))
+    return [`${name} has unsupported field serialization attributes`]
   const fields = new Map([...tsFields.matchAll(/readonly (\w+)(\??): ([^\n]+)/g)]
     .map(match => [match[1], { optional: match[2] === '?', type: match[3]?.trim().replace('import(\'./wire\').', '') }]))
   const expectedFields = [...rustFields.matchAll(/pub (\w+): ([^,\n]+),/g)]
   if (expectedFields.length === 0 || fields.size !== expectedFields.length)
-    problems.push('PairingSnapshot field counts differ')
+    problems.push(`${name} field counts differ`)
   for (const match of expectedFields) {
-    const name = camel(match[1] ?? '')
+    const fieldName = camel(match[1] ?? '')
     const type = rustType(match[2] ?? '')
-    const field = fields.get(name)
+    const field = fields.get(fieldName)
     if (type === undefined || field === undefined || field.optional || field.type !== type)
-      problems.push(`PairingSnapshot.${name} must be required with type ${type ?? 'unknown'}`)
+      problems.push(`${name}.${fieldName} must be required with type ${type ?? 'unknown'}`)
   }
   return problems
 }
@@ -40,5 +48,5 @@ function rustType(value: string): string | undefined {
     const inner = rustType(optional)
     return inner === undefined ? undefined : `${inner} | null`
   }
-  return ({ 'RequestId': 'string', 'DeviceId': 'string', 'String': 'string', 'i64': 'number', 'PairingPhase': 'PairingPhase', 'crate::ErrorCode': 'ErrorCode' } as Record<string, string>)[value]
+  return ({ 'RequestId': 'string', 'DeviceId': 'string', 'String': 'string', 'i64': 'number', 'PairingPhase': 'PairingPhase', 'crate::ErrorCode': 'ErrorCode', 'ErrorCode': 'ErrorCode', 'u32': 'number', 'bool': 'boolean', 'CredentialEnrollment': 'CredentialEnrollment', 'CredentialCleanupReport': 'CredentialCleanupReport' } as Record<string, string>)[value]
 }
