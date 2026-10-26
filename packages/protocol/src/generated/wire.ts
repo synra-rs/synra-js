@@ -164,6 +164,8 @@ export interface SynraError {
   readonly actions?: readonly SuggestedAction[]
   /** 失败操作的追踪标识，用来把报告与日志对上。 */
   readonly traceId?: string
+  /** Structured diagnostic context; it cannot override the error classification. */
+  readonly details?: unknown
 }
 
 
