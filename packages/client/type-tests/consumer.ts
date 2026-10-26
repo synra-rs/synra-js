@@ -107,3 +107,8 @@ export function subscribeAll(): () => void {
 export async function invokeSend(target: string): Promise<{ messageId: string }> {
   return synra.self.invoke<{ target: string }, { messageId: string }>('send-message', { target })
 }
+
+// A plugin can read diagnostic context after the public error guard narrows unknown.
+export function errorDetails(error: unknown): unknown {
+  return synra.isSynraError(error) ? error.details : undefined
+}
