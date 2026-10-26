@@ -142,7 +142,7 @@ export interface EventNamespace {
   /**
    * 发一个事件。
    *
-   * 事件名必须在插件自己的 `_plugin.<slug>.` 命名空间里，内核拒绝越权。
+   * 事件名必须在插件自己的 `_plugin.<完整 @scope/name>.` 命名空间里，内核拒绝越权。
    */
   emit(event: string, payload?: unknown): Promise<void>
   /**

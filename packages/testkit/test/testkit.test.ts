@@ -350,9 +350,9 @@ describe('events', () => {
   })
 
   it('records an emit', async () => {
-    const synra = createMockClient({ capabilities: ['event:emit:_plugin.chat.*'] })
-    await synra.event.emit('_plugin.chat.text', { body: 'hi' })
-    expect(synra.lastArgs('event', 'emit')).toEqual(['_plugin.chat.text', { body: 'hi' }])
+    const synra = createMockClient({ capabilities: ['event:emit:_plugin.@acme/chat.*'] })
+    await synra.event.emit('_plugin.@acme/chat.text', { body: 'hi' })
+    expect(synra.lastArgs('event', 'emit')).toEqual(['_plugin.@acme/chat.text', { body: 'hi' }])
   })
 })
 
