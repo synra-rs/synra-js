@@ -156,7 +156,7 @@ export interface EventNamespace {
 
 /** 设备。 */
 export interface DeviceNamespace {
-  /** 已配对且**在线**的设备。 */
+  /** 已配对且未屏蔽的设备；保留离线项，通过 online 明确当前连接状态。需要 device:list。 */
   list(): Promise<DeviceTarget[]>
   /** 发给一台设备。 */
   send(req: { to: DeviceId, event: string, payload?: unknown }): Promise<void>
