@@ -51,9 +51,13 @@ export const synraBlocklist: Blocklist = [
     /^(?:bg|text|border|ring|outline|fill|stroke|decoration|shadow|from|via|to)-\[#/,
     { message: '颜色只能来自 token：加一个颜色就加一个 --synra-* 变量，不要在类里写字面值' },
   ],
+  // ★ This message used to promise `z-panel / z-overlay / z-modal / z-toast / z-drag`. None of the five exists — no
+  //   token in this package declares them and no template names them — so the rule rejected `z-[1001]` while the bare
+  //   `z-50` it was meant to replace sailed through. Advice that points at nothing is worse than no advice: it makes
+  //   the honest `z-<number>` look like the workaround.
   [
     /^z-\[/,
-    { message: '层级用命名的 token（z-panel / z-overlay / z-modal / z-toast / z-drag）' },
+    { message: '层级不要写任意值（z-[…]）：用 UnoCSS 的 z-<数字>；要盖住 antd 弹层（1000）时用 z-[1001] 并在注释里写明理由' },
   ],
   [
     /^rounded-\[/,
