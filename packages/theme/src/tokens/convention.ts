@@ -44,6 +44,13 @@ export const contrastPairs: readonly ContrastPair[] = [
   { foreground: 'inkDim', background: 'surface', minimum: 4.5, use: '次要文字 / 面板' },
   { foreground: 'inkDim', background: 'raised', minimum: 4.5, use: '次要文字 / 抬起层' },
   { foreground: 'inkDim', background: 'glassBase', minimum: 4.5, use: '次要文字 / 玻璃面（按基底算）' },
+  // ★ The rest of the glass surface, measured on the same base. `glassBase` is `colors.raised`, not `colors.surface`,
+  //   so the `surface` rows above do not cover a panel that became `bg-glass` — and after 16.147 nine panels did. Only
+  //   `inkDim` had a `glassBase` row, so the body text, links and status words on those panels were measured against a
+  //   background they no longer sit on.
+  { foreground: 'ink', background: 'glassBase', minimum: 4.5, use: '正文 / 玻璃面（按基底算）' },
+  { foreground: 'primaryInk', background: 'glassBase', minimum: 4.5, use: '链接 / 玻璃面（按基底算）' },
+  { foreground: 'primary', background: 'glassBase', minimum: 3, use: '主色填充与光晕 / 玻璃面（按基底算）' },
   { foreground: 'primaryInk', background: 'screen', minimum: 4.5, use: '链接 / 页面底' },
   { foreground: 'primaryInk', background: 'raised', minimum: 4.5, use: '链接 / 抬起层' },
   { foreground: 'primary', background: 'screen', minimum: 3, use: '主色填充与光晕 / 页面底' },
