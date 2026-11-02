@@ -78,6 +78,16 @@ export type KernelEvent =
       }
     }
   | {
+      readonly type: 'debugWire'
+      readonly payload: {
+        readonly atMs: number
+        readonly direction: string
+        readonly peer: string
+        readonly label: string
+        readonly bytes: number
+      }
+    }
+  | {
       readonly type: 'logLine'
       readonly payload: { readonly level: string; readonly line: string }
     }
