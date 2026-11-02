@@ -89,19 +89,39 @@ export interface ScanState {
   readonly found: number
 }
 
-/** Shared restricted first-pairing runtime phases; these never grant authorization. */
-export type PairingPhase = 'listening' | 'connecting' | 'confirming' | 'cancelling'
-  | 'paired' | 'cancelled' | 'timedOut' | 'failed'
+/**
+ * Where a pairing attempt has got to.
+ *
+ * `waiting` means this device is waiting for the other person; `asked` means the other person is
+ * waiting for this one. They are separate words because they put the code on different screens.
+ */
+export type PairingPhase = 'idle' | 'waiting' | 'asked' | 'done'
 
-/** Public task snapshot from synra-protocol/src/pairing.rs; Option fields serialize as null. */
+/** How a pairing attempt ended. */
+export type PairingOutcome = 'paired' | 'refused' | 'cancelled' | 'timedOut'
+
+/** The request this device started: the code is on this screen. */
+export interface PairingOffer {
+  readonly code: string
+  readonly deviceId: string
+  readonly displayName: string
+  readonly platform: string
+}
+
+/** The request the other device started: the code is on that screen. */
+export interface PairingAsk {
+  readonly code: string
+  readonly deviceId: string
+  readonly displayName: string
+  readonly platform: string
+}
+
+/** Everything the pairing panel draws, in one value. */
 export interface PairingSnapshot {
-  readonly requestId: string
-  readonly peerId: string
   readonly phase: PairingPhase
-  readonly expiresAtMs: number
-  readonly reply: string | null
-  readonly errorCode: import('./wire').ErrorCode | null
-  readonly detail: string | null
+  readonly offer?: PairingOffer
+  readonly ask?: PairingAsk
+  readonly outcome?: PairingOutcome
 }
 
 /** 一个意图可能被怎么处理。 */
