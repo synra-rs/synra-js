@@ -31,11 +31,13 @@
  */
 
 import { colors } from './tokens/color.js'
+import { controlHeight } from './tokens/control.js'
 import { focusRing, glass, glow } from './tokens/material.js'
 import { duration, ease, radius, zIndex } from './tokens/scale.js'
 import { fontFamily } from './tokens/type.js'
 
 export { colors, withAlpha } from './tokens/color.js'
+export { controlHeight } from './tokens/control.js'
 export { contrastPairs, themeConvention } from './tokens/convention.js'
 export type { ContrastPair } from './tokens/convention.js'
 export { focusRing, glass, glow } from './tokens/material.js'
@@ -78,6 +80,9 @@ export function cssVariables(): Record<string, string> {
 
   for (const [key, value] of Object.entries(radius)) {
     variables[`--synra-radius-${kebab(key)}`] = value
+  }
+  for (const [key, value] of Object.entries(controlHeight)) {
+    variables[`--synra-control-${kebab(key)}`] = value
   }
   for (const [key, value] of Object.entries(zIndex)) {
     variables[`--synra-z-${kebab(key)}`] = String(value)

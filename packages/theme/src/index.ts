@@ -40,6 +40,7 @@ export {
   breakpoints,
   colors,
   contrastPairs,
+  controlHeight,
   cssVariables,
   duration,
   ease,

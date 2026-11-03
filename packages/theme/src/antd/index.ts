@@ -31,7 +31,8 @@ import type { AliasToken, SeedToken } from 'ant-design-vue/es/theme/interface'
 
 import { theme as antdTheme } from 'ant-design-vue'
 
-import { colors, duration, ease, fontFamily, fontSize, glass, radius, withAlpha } from '../tokens.js'
+import { colors, controlHeight, duration, ease, fontFamily, fontSize, glass, radius, withAlpha } from '../tokens.js'
+import { controlCss } from './controls.js'
 
 /**
  * 我们的尺寸 token 是带单位的字符串（CSS 里要用），antd 的 token 是**数字**（像素由它自己补）。
@@ -113,6 +114,9 @@ const tokenOverrides = {
   fontSizeSM: px(fontSize.sm[0]),
   fontSizeLG: px(fontSize.md[0]),
   lineHeight: Number.parseFloat(fontSize.base[1]),
+  controlHeight: px(controlHeight.standard),
+  controlHeightSM: px(controlHeight.compact),
+  controlHeightLG: px(controlHeight.large),
 
   // ── 动效：时长与缓动来自 token（R30） ─────────────────────────────────────
   motionDurationFast: duration.fast,
@@ -155,6 +159,9 @@ export const synraAntdTokenMap = {
   '--synra-radius-control': 'borderRadius',
   '--synra-radius-surface': 'borderRadiusLG',
   '--synra-font-sans': 'fontFamily',
+  '--synra-control-standard': 'controlHeight',
+  '--synra-control-compact': 'controlHeightSM',
+  '--synra-control-large': 'controlHeightLG',
   '--synra-duration-fast': 'motionDurationFast',
   '--synra-duration-base': 'motionDurationMid',
   '--synra-duration-slow': 'motionDurationSlow',
@@ -214,7 +221,7 @@ const FLOATING_SELECTORS = [
 export function synraAntdFloatingCss(): string {
   const blur = `blur(var(--synra-blur)) saturate(var(--synra-saturate))`
 
-  return `${FLOATING_SELECTORS} {
+  return `${controlCss()}\n${FLOATING_SELECTORS} {
   backdrop-filter: ${blur} !important;
   -webkit-backdrop-filter: ${blur} !important;
 }

@@ -30,7 +30,7 @@ describe('cssVariables', () => {
       expect(variables[name], `${name} 应该存在`).toBe(colors[key as keyof typeof colors])
     }
 
-    const colourVariables = Object.keys(variables).filter(name => /^--synra-(?!glass|blur|saturate|glow|focus|font|radius|z-|duration|ease)/.test(name))
+    const colourVariables = Object.keys(variables).filter(name => /^--synra-(?!glass|blur|saturate|glow|focus|font|radius|control|z-|duration|ease)/.test(name))
     expect(colourVariables).toHaveLength(Object.keys(colors).length)
   })
 
@@ -40,6 +40,10 @@ describe('cssVariables', () => {
     expect(Object.keys(cssVariables()).sort()).toEqual(
       [
         '--synra-blur',
+        '--synra-control-compact',
+        '--synra-control-large',
+        '--synra-control-standard',
+        '--synra-control-touch',
         '--synra-danger',
         '--synra-duration-base',
         '--synra-duration-fast',
