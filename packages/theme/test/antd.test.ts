@@ -12,7 +12,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { synraAntdFloatingCss, synraAntdTheme, synraAntdTokenMap } from '../src/antd/index.js'
-import { colors, controlHeight, cssVariables, duration, ease, fontFamily, fontSize, glass, radius, withAlpha } from '../src/tokens.js'
+import { colors, controlHeight, cssVariables, duration, ease, fontFamily, fontSize, glass, glow, radius, withAlpha } from '../src/tokens.js'
 
 const theme = synraAntdTheme()
 
@@ -43,6 +43,7 @@ describe('适配器不许引入新取值', () => {
       ...Object.values(colors),
       withAlpha(colors.raised, 40),
       glass.color,
+      glow,
       ...Object.values(radius).map(px),
       ...Object.values(controlHeight).map(px),
       ...Object.values(duration),

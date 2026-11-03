@@ -31,7 +31,7 @@ import type { AliasToken, SeedToken } from 'ant-design-vue/es/theme/interface'
 
 import { theme as antdTheme } from 'ant-design-vue'
 
-import { colors, controlHeight, duration, ease, fontFamily, fontSize, glass, radius, withAlpha } from '../tokens.js'
+import { colors, controlHeight, duration, ease, fontFamily, fontSize, glass, glow, radius, withAlpha } from '../tokens.js'
 import { controlCss } from './controls.js'
 
 /**
@@ -81,19 +81,7 @@ const tokenOverrides = {
   colorBorder: colors.lineStrong,
   colorBorderSecondary: colors.line,
   colorSplit: colors.line,
-  /**
-   * ★ **`controlOutline` 还没映射，而这是一个已知缺口（R45）。**
-   *
-   * antd 从 `controlOutline` + `controlOutlineWidth` 推出焦点环；不映射时它自己从 `colorPrimary` 发明一个 ——
-   * 那个颜色与 `glow`（为这件事定义的 token）**不是同一个值**。于是 R45 说"发光只允许出现在焦点环、那条线的
-   * 活动态、主按钮按下态"，目前只兑现了后两处。
-   *
-   * 没直接写上的原因是机制而不是取舍：`test/antd.test.ts` 的"每个值都能追到某个 token"把允许取值从 token 里
-   * 算出来，新加一支值会让它变红 —— 而那条守卫**本来就该这样**（新用一支 token 必须是一次显式决定 ✓）。
-   * 那次尝试里我没能在不绕过守卫的前提下把它改绿，就先退回绿色状态：**宁可留一个写在注释里的缺口，
-   * 也不留一个红的测试**。补法两步：这里写 `controlOutline: glow`（并把 `glow` 加进 import），
-   * 再把 `glow` 的值加进那条断言的允许集合。
-   */
+  controlOutline: glow,
 
   // ── 填充 ──────────────────────────────────────────────────────────────────
   colorFillSecondary: colors.raised,
@@ -102,7 +90,7 @@ const tokenOverrides = {
 
   // ── 圆角三档：antd 的三档也填满（R52：不许把三档砍成一档） ────────────────
   borderRadius: px(radius.control),
-  borderRadiusSM: px(radius.control),
+  borderRadiusSM: px(radius.compact),
   borderRadiusLG: px(radius.surface),
 
   // ── 字 ────────────────────────────────────────────────────────────────────
@@ -157,6 +145,7 @@ export const synraAntdTokenMap = {
   '--synra-line': 'colorSplit',
   '--synra-line-strong': 'colorBorder',
   '--synra-radius-control': 'borderRadius',
+  '--synra-radius-compact': 'borderRadiusSM',
   '--synra-radius-surface': 'borderRadiusLG',
   '--synra-font-sans': 'fontFamily',
   '--synra-control-standard': 'controlHeight',

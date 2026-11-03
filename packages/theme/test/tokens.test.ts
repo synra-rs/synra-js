@@ -65,6 +65,7 @@ describe('cssVariables', () => {
         '--synra-primary-deep',
         '--synra-primary-ink',
         '--synra-radius-control',
+        '--synra-radius-compact',
         '--synra-radius-pill',
         '--synra-radius-surface',
         '--synra-raised',

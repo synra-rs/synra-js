@@ -1,9 +1,10 @@
 /** Input capability also covers touch enabled desktop windows. */
 export function controlCss(): string {
   return `
-.synra-icon-button {
-  min-width: var(--synra-control-compact);
-  min-height: var(--synra-control-compact);
+.synra-icon-button.ant-btn {
+  width: var(--synra-control-compact);
+  height: var(--synra-control-compact);
+  padding: 0;
 }
 @media (any-pointer: coarse) {
   .ant-btn, .ant-input:not(textarea), .ant-input-affix-wrapper,
@@ -24,6 +25,12 @@ export function controlCss(): string {
   .ant-checkbox-wrapper {
     min-height: var(--synra-control-touch);
     align-items: center;
+  }
+  .ant-switch::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block: calc((100% - var(--synra-control-touch)) / 2);
   }
 }
 `
