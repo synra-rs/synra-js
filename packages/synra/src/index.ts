@@ -41,7 +41,6 @@ export type {
   IntentId,
   IntentInvocation,
   IntentOutcome,
-  PairRefusal,
   Platform,
   PlatformKind,
   PluginId,

@@ -15,7 +15,7 @@
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-import { evaluateProduct, kernelCandidates, rustConvention, rustErrorCodes, tsErrorCodes } from './check-shapes'
+import { evaluateProduct, kernelCandidates, rustConvention, rustErrorCodes, tsErrorCodes } from './shapes/parsers'
 
 describe('kernelCandidates', () => {
   // 期望值用 `join` 拼，因为这个函数返回的就是平台自己的分隔符：在 Windows 上写死 `/a/b`

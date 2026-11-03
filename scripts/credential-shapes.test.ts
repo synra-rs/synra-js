@@ -3,8 +3,8 @@ import { resolve } from 'node:path'
 import process from 'node:process'
 import { expect, it } from 'vitest'
 
-import { kernelCandidates } from './check-shapes'
 import { requiredRecordProblems } from './pairing-shapes'
+import { kernelCandidates } from './shapes/parsers'
 
 const rust = kernelCandidates(process.cwd(), process.env.SYNRA_CORE_ROOT).flatMap((root) => {
   try {

@@ -1,15 +1,5 @@
 /* eslint-disable */
-/**
- * ⚠️ **手写镜像，由脚本核对** —— 不是自动生成的。
- *
- * 来源：synra-rust-core/crates/synra-protocol/src
- * 核对：synra-js/scripts/check-shapes.ts
- *
- * ★ 这里曾经写着"自动生成，请勿手动修改"，并给出 `cargo test -p synra-protocol --features ts-export`
- * 这条命令。**那条命令跑不起来**：synra-protocol 没有 `[features]` 段，也没有 `ts_export` 模块，
- * 导出路径从来没有存在过。一个跑不起来的生成器比没有生成器更糟 —— 它让人以为不必再查，
- * 而这个文件里真正的失效是静默的：Rust 改了字段名，TS 侧收到 `undefined`，表现是面板空白。
- *
+/** Handwritten protocol mirror checked against synra-protocol by scripts/check-shapes.ts. */
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 帧（§4）
@@ -168,7 +158,6 @@ export interface SynraError {
   readonly details?: unknown
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // 信封（§5）
 // ─────────────────────────────────────────────────────────────────────────────
@@ -209,15 +198,6 @@ export type PlatformKind = 'desktop' | 'mobile' | 'server'
  * 系统只在客户端视图里出现。放在这里是因为两个包都要用它，而定义一处比两处好。
  */
 export type Platform = 'windows' | 'macos' | 'linux' | 'android' | 'ios'
-
-/**
- * 配对被拒的原因。
- *
- * `busy` 而不是排队：一个弹窗是用户正在做的决定，把第二个排在它后面意味着第二个会在几分钟后
- * 被默认回答。
- */
-export type PairRefusal = 'busy' | 'expired' | 'blocked'
-
 
 /** 意图的展示信息，供接收方做确认弹窗。 */
 export interface IntentDisplay {
@@ -297,7 +277,6 @@ export type TransferAbortReason =
 // ─────────────────────────────────────────────────────────────────────────────
 // 发现（§9）
 // ─────────────────────────────────────────────────────────────────────────────
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 限制（§7.1）

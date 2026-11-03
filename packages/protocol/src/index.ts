@@ -106,7 +106,6 @@ export type {
   IntentInvocation,
   IntentOutcome,
   NetworkErrorCode,
-  PairRefusal,
   Platform,
   // 会话
   PlatformKind,

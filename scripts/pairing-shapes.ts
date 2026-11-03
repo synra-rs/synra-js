@@ -1,4 +1,4 @@
-/** Check the task enum and exact nullable fields, not merely the presence of similarly named fields. */
+/** Check the current pairing DTO and its omitted Option fields. */
 export function pairingShapeProblems(rust: string, ts: string): string[] {
   const problems: string[] = []
   const variants = /pub enum PairingPhase\s*\{([\s\S]*?)\n\}/.exec(rust)?.[1]
@@ -10,29 +10,36 @@ export function pairingShapeProblems(rust: string, ts: string): string[] {
   if (expected.length === 0 || JSON.stringify(expected) !== JSON.stringify(actual))
     problems.push('PairingPhase variants differ')
 
-  return [...problems, ...requiredRecordProblems(rust, ts, 'PairingSnapshot')]
+  const outcomes = /pub enum PairingOutcome\s*\{([\s\S]*?)\n\}/.exec(rust)?.[1]
+  const outcomeUnion = /export type PairingOutcome\s*=([^\n]+)/.exec(ts)?.[1]
+  const expectedOutcomes = [...(outcomes ?? '').matchAll(/^\s*(\w+),/gm)].map(match => camel(match[1] ?? '')).sort()
+  const actualOutcomes = [...(outcomeUnion ?? '').matchAll(/'([^']+)'/g)].map(match => match[1]).sort()
+  if (!expectedOutcomes.length || JSON.stringify(expectedOutcomes) !== JSON.stringify(actualOutcomes))
+    problems.push('PairingOutcome variants differ')
+  return [...problems, ...requiredRecordProblems(rust, ts, 'PairingSnapshot', true)]
 }
 
 /** Required nullable fields follow the actual Rust type; skipped Option fields are not supported here. */
-export function requiredRecordProblems(rust: string, ts: string, name: string): string[] {
+export function requiredRecordProblems(rust: string, ts: string, name: string, allowSkippedOptions = false): string[] {
   const problems: string[] = []
   const rustFields = new RegExp(`pub struct ${name}\\s*\\{([\\s\\S]*?)\\n\\}`).exec(rust)?.[1]
   const tsFields = new RegExp(`export interface ${name}\\s*\\{([\\s\\S]*?)\\n\\}`).exec(ts)?.[1]
   if (rustFields === undefined || tsFields === undefined)
     return [`${name} could not be read on both sides`]
-  if (/#\[serde\(/.test(rustFields))
+  if (!allowSkippedOptions && /#\[serde\(/.test(rustFields))
     return [`${name} has unsupported field serialization attributes`]
   const fields = new Map([...tsFields.matchAll(/readonly (\w+)(\??): ([^\n]+)/g)]
     .map(match => [match[1], { optional: match[2] === '?', type: match[3]?.trim().replace('import(\'./wire\').', '') }]))
-  const expectedFields = [...rustFields.matchAll(/pub (\w+): ([^,\n]+),/g)]
+  const expectedFields = [...rustFields.replace(/^\s*\/\/.*$/gm, '').matchAll(/((?:\s*#\[[^\]]*\])*)\s*pub (\w+): ([^,\n]+),/g)]
   if (expectedFields.length === 0 || fields.size !== expectedFields.length)
     problems.push(`${name} field counts differ`)
   for (const match of expectedFields) {
-    const fieldName = camel(match[1] ?? '')
-    const type = rustType(match[2] ?? '')
+    const fieldName = camel(match[2] ?? '')
+    const optional = allowSkippedOptions && /skip_serializing_if\s*=\s*"Option::is_none"/.test(match[1] ?? '')
+    const type = rustType(optional ? (match[3] ?? '').replace(/^Option<(.+)>$/, '$1') : match[3] ?? '')
     const field = fields.get(fieldName)
-    if (type === undefined || field === undefined || field.optional || field.type !== type)
-      problems.push(`${name}.${fieldName} must be required with type ${type ?? 'unknown'}`)
+    if (type === undefined || field === undefined || field.optional !== optional || field.type !== type)
+      problems.push(`${name}.${fieldName} must be ${optional ? 'optional' : 'required'} with type ${type ?? 'unknown'}`)
   }
   return problems
 }
@@ -48,5 +55,5 @@ function rustType(value: string): string | undefined {
     const inner = rustType(optional)
     return inner === undefined ? undefined : `${inner} | null`
   }
-  return ({ 'RequestId': 'string', 'DeviceId': 'string', 'String': 'string', 'i64': 'number', 'PairingPhase': 'PairingPhase', 'crate::ErrorCode': 'ErrorCode', 'ErrorCode': 'ErrorCode', 'u32': 'number', 'bool': 'boolean', 'CredentialEnrollment': 'CredentialEnrollment', 'CredentialRecovery': 'CredentialRecovery', 'CredentialCleanupReport': 'CredentialCleanupReport' } as Record<string, string>)[value]
+  return ({ 'RequestId': 'string', 'DeviceId': 'string', 'String': 'string', 'i64': 'number', 'PairingPhase': 'PairingPhase', 'PairingOffer': 'PairingOffer', 'PairingAsk': 'PairingAsk', 'PairingOutcome': 'PairingOutcome', 'crate::ErrorCode': 'ErrorCode', 'ErrorCode': 'ErrorCode', 'u32': 'number', 'bool': 'boolean', 'CredentialEnrollment': 'CredentialEnrollment', 'CredentialRecovery': 'CredentialRecovery', 'CredentialCleanupReport': 'CredentialCleanupReport' } as Record<string, string>)[value]
 }
