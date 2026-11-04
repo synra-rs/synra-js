@@ -101,7 +101,7 @@ export function checkDtos(context: ShapeContext): void {
       for (const [name, fields] of dtoFields) {
         const mirrored = tsFields.get(name)
         if (mirrored === undefined) {
-          fail('dto-coverage', `${name} 在内核里声明了，ui.ts 里没有对应的 interface`)
+          fail('dto-coverage', `${name} 在内核里声明了，TypeScript 镜像里没有对应的 interface`)
           continue
         }
         // Rust 是 snake_case，TS 是 camelCase，所以比的是转换过的名字 —— 这才能发现**改名**，而不只是发现
@@ -110,7 +110,7 @@ export function checkDtos(context: ShapeContext): void {
         const mirroredNames = new Set(mirrored.map(f => f.replace(/[A-Z]/g, c => `_${c.toLowerCase()}`)))
         const missing = fields.filter(f => !mirroredNames.has(f))
         if (missing.length > 0) {
-          fail('dto-coverage', `${name} 在 Rust 里声明了 ${missing.join(', ')}，ui.ts 里没有`)
+          fail('dto-coverage', `${name} 在 Rust 里声明了 ${missing.join(', ')}，TypeScript 镜像里没有`)
         }
       }
 
@@ -136,7 +136,7 @@ export function checkDtos(context: ShapeContext): void {
       const agreed = [...dtoFields.keys()].filter(n => tsFields.has(n)).length
       evidence.push(
         `dto-coverage: Rust ${String(dtoFields.size)} 个 DTO 逐字段对照，${String(agreed)} 个对得上；`
-        + `ui.ts 共 ${String(tsFields.size)} 个 interface`,
+        + `TypeScript 镜像共 ${String(tsFields.size)} 个 interface`,
       )
     }
   }
