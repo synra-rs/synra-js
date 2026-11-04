@@ -15,6 +15,7 @@ import type {
   DeviceCard,
   IntentSnapshot,
   PairingSnapshot,
+  InputSnapshot,
   PluginSnapshot,
   ScanState,
   TransferSnapshot,
@@ -41,6 +42,7 @@ export type KernelEvent =
   | { readonly type: 'deviceRemoved'; readonly payload: { readonly deviceId: DeviceId } }
   | { readonly type: 'scanUpdated'; readonly payload: ScanState }
   | { readonly type: 'pairingUpdated'; readonly payload: PairingSnapshot }
+  | { readonly type: 'inputUpdated'; readonly payload: InputSnapshot }
   | { readonly type: 'intentUpdated'; readonly payload: IntentSnapshot }
   | { readonly type: 'intentFinished'; readonly payload: { readonly intentId: IntentId } }
   // ★ 整份快照，不是补丁：补丁是**写入方**的输入，不是结果的描述，读者若自己重放一遍就是在重算内核已知的东西。

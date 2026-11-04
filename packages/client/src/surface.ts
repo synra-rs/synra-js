@@ -49,6 +49,7 @@ export type PlatformCapability
     | 'open_path'
     | 'reveal_path'
     | 'simulate_keys'
+    | 'control_pointer'
     | 'notify'
     | 'clipboard_read'
     | 'clipboard_write'
@@ -197,7 +198,8 @@ export interface PickOptions {
 export interface DeviceTarget {
   readonly deviceId: DeviceId
   readonly displayName: string
-  readonly platform: 'windows' | 'macos' | 'linux' | 'android' | 'ios'
+  /** Discovery can know the device kind before it knows the remote OS. */
+  readonly platform: 'windows' | 'macos' | 'linux' | 'android' | 'ios' | 'desktop' | 'headless'
   readonly online: boolean
 }
 

@@ -45,6 +45,9 @@ export type {
   //   放在这里是因为它和别的宿主形状一样是**界面读回来的**，而界面手抄一份就不会在 Rust 改字段时编译失败。
   HistogramSnapshot,
   IdentitySnapshot,
+  InputPhase,
+  InputSession,
+  InputSnapshot,
   // ★ 确认框在下载之前读它：权限列表与发布者声明都来自这一份，界面不再手抄一个 interface。
   InstallPreviewDto,
   // ★ The answer to `plugins_install`. Listed here for the same reason `ScanOptions` is: the shell's interface *reads*
