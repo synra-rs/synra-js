@@ -6,6 +6,14 @@ export function controlCss(): string {
   height: var(--synra-control-compact);
   padding: 0;
 }
+.ant-select-single .ant-select-selector {
+  display: flex;
+  align-items: center;
+}
+.ant-select-single .ant-select-selection-item,
+.ant-select-single .ant-select-selection-placeholder {
+  line-height: normal;
+}
 @media (any-pointer: coarse) {
   .ant-btn, .ant-input:not(textarea), .ant-input-affix-wrapper,
   .ant-select-single, .ant-select-single .ant-select-selector,

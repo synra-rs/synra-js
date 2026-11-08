@@ -95,4 +95,12 @@ describe('浮起层的 CSS', () => {
   it('带上 -webkit- 前缀（WebKit 上 backdrop-filter 需要它）', () => {
     expect(css).toContain('-webkit-backdrop-filter')
   })
+
+  it('给下拉层明确的玻璃底色，并让 Select 文本垂直居中', () => {
+    expect(css).toContain('background-color: var(--synra-glass) !important')
+    expect(css).toContain('.ant-select-single .ant-select-selector')
+    expect(css).toContain('align-items: center')
+    expect(css).toContain('.ant-select-single .ant-select-selection-item')
+    expect(css).toContain('line-height: normal')
+  })
 })

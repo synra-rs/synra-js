@@ -211,6 +211,7 @@ export function synraAntdFloatingCss(): string {
   const blur = `blur(var(--synra-blur)) saturate(var(--synra-saturate))`
 
   return `${controlCss()}\n${FLOATING_SELECTORS} {
+  background-color: var(--synra-glass) !important;
   backdrop-filter: ${blur} !important;
   -webkit-backdrop-filter: ${blur} !important;
 }
