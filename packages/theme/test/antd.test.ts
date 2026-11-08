@@ -103,4 +103,10 @@ describe('浮起层的 CSS', () => {
     expect(css).toContain('.ant-select-single .ant-select-selection-item')
     expect(css).toContain('line-height: normal')
   })
+
+  it('在触摸 WebView 上提高浮层不透明度', () => {
+    expect(css).toContain('@media (any-pointer: coarse)')
+    expect(css).toContain('background-color: var(--synra-glass-base) !important')
+    expect(css).toContain('color-mix(in oklab, var(--synra-glass-base) 94%, transparent)')
+  })
 })

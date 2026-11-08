@@ -222,6 +222,16 @@ export function synraAntdFloatingCss(): string {
   }
 }
 
+/* 触摸设备上的 WebView 可能声明支持 backdrop-filter，却没有稳定地完成背景合成。
+   这时透明层会把后面的文字透出来，所以移动端使用更高不透明度的玻璃底色；
+   不支持 color-mix 的旧 WebView 直接使用不透明基底。 */
+@media (any-pointer: coarse) {
+  ${FLOATING_SELECTORS.replaceAll('\n', '\n  ')} {
+    background-color: var(--synra-glass-base) !important;
+    background-color: color-mix(in oklab, var(--synra-glass-base) 94%, transparent) !important;
+  }
+}
+
 /* ★ antd 的 inline menu 自己画了一条边，而外壳也画了一条。
 
    Menu 的 inline 主题里有一条 borderInlineEnd（实测位置：ant-design-vue/es/menu/style/theme.js），
