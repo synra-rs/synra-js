@@ -12,7 +12,7 @@
  *
  * 这里刻意**不含图标类**：图标要 `@iconify-json/*` 数据集，而本包没有（R41 把数据集留给消费者）。
  */
-import { createGenerator } from 'unocss'
+import { createGenerator, presetWind4 } from 'unocss'
 import { describe, expect, it } from 'vitest'
 
 import { synraConfig } from '../src/unocss/index.js'
@@ -69,7 +69,11 @@ const utilities = [
   'row-between',
 ]
 
-const uno = await createGenerator(synraConfig())
+const synra = synraConfig()
+const uno = await createGenerator({
+  ...synra,
+  presets: [presetWind4({ dark: 'class' }), ...(synra.presets ?? [])],
+})
 
 describe('每个 token 都产出它承诺的工具类', () => {
   it.each(utilities)('%s 会生成 CSS', async (name) => {

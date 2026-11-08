@@ -4,14 +4,13 @@
  * # 为什么其中一条是端到端跑生成器
  *
  * 其余断言看的是我们**声明**了什么，而这条看的是 UnoCSS **实际产出**了什么。两者的差别正是
- * "presetWind3 的 reset 有没有漏进来"这类问题所在：我们写了 `preflight: 'tokens'`，但那个开关
- * 只管**我们自己的**那一段 —— Tailwind 的 reset 来自嵌套的 preset，而它会一起被打进 `preflights`。
- * 官网的排版能不能活，取决于那一份没漏进来，而这件事只有生成一次 CSS 才知道。
+ * "消费者有没有显式选择基础 preset" 这类问题不能靠 Synra preset 自己保证，因此端到端生成测试会
+ * 像前端宿主一样显式组合 `presetWind4` 与 Synra preset。
  */
 
 import type { Preset } from 'unocss'
 import type { PreflightTier } from '../src/index.js'
-import { createGenerator } from 'unocss'
+import { createGenerator, presetWind4 } from 'unocss'
 
 import { describe, expect, it } from 'vitest'
 import { colors, glass } from '../src/index.js'
@@ -29,9 +28,21 @@ function preflightOf(tier: PreflightTier): string {
   return getCSS?.() ?? ''
 }
 
+function consumerConfig(options: PreflightTier | undefined = undefined) {
+  const synra = synraConfig(options ? { preflight: options } : undefined)
+  return {
+    ...synra,
+    presets: [presetWind4({ dark: 'class' }), ...(synra.presets ?? [])],
+  }
+}
+
 describe('presetSynra', () => {
   it('names itself synra', () => {
     expect(presetSynra().name).toBe('synra')
+  })
+
+  it('does not select a base utility preset', () => {
+    expect(presetSynra().presets).toBeUndefined()
   })
 
   // ★ 单一真相源的机械形式：每个颜色都映射到一个变量，而不是一个色值。于是改一支紫只改一处。
@@ -54,7 +65,7 @@ describe('presetSynra', () => {
     expect(Object.values(colors)).toContain(glass.base)
     // 一个模糊半径：玻璃的"厚度"是材质，不是可调参数。
     expect(Object.keys(theme.blur)).toHaveLength(1)
-    expect(Object.keys(theme.boxShadow)).toHaveLength(1)
+    expect(Object.keys(theme.shadow)).toHaveLength(1)
   })
 })
 
@@ -82,8 +93,8 @@ describe('the preflight tiers', () => {
 })
 
 describe('the generated CSS', () => {
-  it('reads the variables the preflight declares, and carries no Tailwind reset', async () => {
-    const uno = await createGenerator(synraConfig())
+  it('reads Synra variables when composed with Wind4', async () => {
+    const uno = await createGenerator(consumerConfig())
     const { css } = await uno.generate(
       'bg-surface text-ink-dim rounded-surface z-modal shadow-glow floating focusable',
       { preflights: true },
@@ -91,19 +102,23 @@ describe('the generated CSS', () => {
 
     // 工具类读变量，变量由同一份 token 发出 —— 这是"工具类与 CSS 变量是同一条声明"。
     // 断言照抄生成器真实的输出格式（UnoCSS 在声明里不写冒号后的空格）。
-    expect(css).toContain('background-color:var(--synra-surface)')
+    expect(css).toContain('background-color:color-mix(in srgb, var(--synra-surface)')
     expect(css).toContain('--synra-surface: #14101f')
     expect(css).toContain('z-index:30')
 
     // 玻璃：模糊半径来自 token，saturate 只在这个 shortcut 里出现。
     expect(css).toContain('backdrop-filter')
     expect(css).toContain('var(--synra-blur)')
-    expect(css).toContain('saturate(1.4)')
+    expect(css).toContain('saturate(140%)')
     expect(css).toContain('--synra-glass-base')
 
-    // ★ 这一条是"官网能用"的守卫：Tailwind 的 reset 一旦漏进来，它带着 `border-width: 0`
-    //   （`*, ::before, ::after`）而我们的 reset 没有这一句。
-    expect(css).not.toContain('border-width: 0')
+  })
+
+  it('does not add a base reset by itself', async () => {
+    const uno = await createGenerator(synraConfig())
+    const { css } = await uno.generate('bg-surface', { preflights: true })
+
+    expect(css).not.toContain('border: 0 solid')
   })
 })
 
@@ -223,7 +238,11 @@ describe('structuralShortcuts', () => {
   //   被遮蔽时一条都不会出现（而巧合相同的那几条 —— 比如 ring 的 offset-shadow 链 —— 不足以让它通过，
   //   因为 `ring-2` 与内建 `ring` 的宽度不同）。
   it('every shortcut expands to its own body rather than being shadowed', async () => {
-    const uno = await createGenerator(synraConfig({ icons: false }))
+    const synra = synraConfig({ icons: false })
+    const uno = await createGenerator({
+      ...synra,
+      presets: [presetWind4({ dark: 'class' }), ...(synra.presets ?? [])],
+    })
     const shadowed: string[] = []
 
     for (const [name, body] of Object.entries(structuralShortcuts as Record<string, string>)) {
@@ -247,12 +266,16 @@ describe('structuralShortcuts', () => {
   // 焦点环不能省，而且必须是 `:focus-visible`：`outline-none` 而没有替代是这类界面里最容易犯的
   // 可访问性错误，而"能看见但鼠标点一下也亮"是它的近亲。
   it('keeps a keyboard-only focus ring', async () => {
-    const uno = await createGenerator(synraConfig({ icons: false }))
+    const synra = synraConfig({ icons: false })
+    const uno = await createGenerator({
+      ...synra,
+      presets: [presetWind4({ dark: 'class' }), ...(synra.presets ?? [])],
+    })
     const { css } = await uno.generate('focusable', { preflights: false })
 
-    expect(css).toContain('outline:2px solid transparent')
+    expect(css).toContain('outline-style:none')
     expect(css).toContain(':focus-visible')
-    expect(css).toContain('--un-ring-width:2px')
+    expect(css).toContain('--un-ring-offset-width:2px')
     // `:focus` 单独出现（不带 `-visible`）就说明短路又变成了内建规则的影子。
     expect(css).not.toMatch(/:focus(?!-visible)/)
   })

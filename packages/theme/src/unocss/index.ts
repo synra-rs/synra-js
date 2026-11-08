@@ -6,11 +6,14 @@
  *
  * ```ts
  * // uno.config.ts
- * import { defineConfig } from 'unocss'
+ * import { defineConfig, presetWind4 } from 'unocss'
  * import { synraConfig } from '@synra/theme/unocss'
  *
- * export default defineConfig({ ...synraConfig() })          // 宿主 / 插件
- * export default defineConfig({ ...synraConfig({ preflight: 'tokens' }) })  // 官网
+ * const synra = synraConfig()
+ * export default defineConfig({
+ *   ...synra,
+ *   presets: [presetWind4(), ...synra.presets],
+ * })
  * ```
  *
  * 想自己写配置、只借这几块也可以：`presetSynra` / `synraTheme` / `synraBlocklist` /

@@ -7,11 +7,14 @@
  * 只给 preset 的后果是每个消费者各自抄一份禁用名单 —— 而那正是这整套东西想消灭的、会漂移的拷贝。
  *
  * ```ts
- * // uno.config.ts（宿主 / 插件 / 官网都一样，只有 preflight 档不同）
- * import { defineConfig } from 'unocss'
+ * // uno.config.ts（宿主 / 插件 / 官网按需选择基础 preset）
+ * import { defineConfig, presetWind4 } from 'unocss'
  * import { synraConfig } from '@synra/theme/unocss'
  *
- * export default defineConfig({ ...synraConfig() })
+ * export default defineConfig({
+ *   ...synraConfig(),
+ *   presets: [presetWind4(), ...synraConfig().presets],
+ * })
  * ```
  *
  * # 图标：`cdn: false`
@@ -37,7 +40,7 @@ export interface SynraConfigOptions extends SynraPresetOptions {
   readonly icons?: boolean
 }
 
-/** 一份完整的 UnoCSS 配置，含 preset、禁用名单与图标策略。 */
+/** Synra 的 UnoCSS 配置片段，含主题 preset、禁用名单与图标策略。基础 preset 由消费者决定。 */
 export function synraConfig(options: SynraConfigOptions = {}): UserConfig {
   const { icons = true, ...presetOptions } = options
 

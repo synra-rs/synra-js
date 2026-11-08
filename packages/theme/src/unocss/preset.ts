@@ -10,16 +10,15 @@
  * ⚠️ 代价说清楚：`var()` 颜色**不支持透明度修饰**（`bg-surface/50` 不会按预期工作）。
  * 要半透明的面就用已经带 alpha 的 token（`bg-glass`），而不是给不透明的 token 加个后缀。
  *
- * # `presetWind3` 的 preflight 必须关掉
+ * # 基础 preset 由消费者选择
  *
- * 它自带 Tailwind 的 reset。留着它，`preflight: 'tokens'` 那一档就**名存实亡**——
- * 官网还是会拿到一份 reset，而它的排版会被打散。这是"官网能当消费者"的前提。
+ * 这个 preset 只提供 Synra 的 token、快捷方式与应用层变量。基础工具集和 reset 由宿主项目选择，
+ * 这样前端可以直接配置 `presetWind4`，官网等其他消费者也可以使用自己的基础 preset。
  */
 
 import type { Preset } from 'unocss'
 import type { PreflightTier } from '../css.js'
 
-import { presetWind3 } from 'unocss'
 import { css } from '../css.js'
 import { breakpoints, colors, duration, ease, fontFamily, fontSize, radius, zIndex } from '../tokens.js'
 import { structuralShortcuts } from './shortcuts.js'
@@ -63,15 +62,14 @@ export function synraThemeColors(): Record<string, string> {
  */
 export interface SynraTheme {
   readonly colors: Record<string, string>
-  readonly fontFamily: Record<string, string>
-  readonly fontSize: Record<string, readonly [string, string]>
-  readonly breakpoints: Record<string, string>
-  readonly borderRadius: Record<string, string>
-  readonly zIndex: Record<string, number>
+  readonly font: Record<string, string>
+  readonly text: Record<string, { fontSize: string; lineHeight: string }>
+  readonly breakpoint: Record<string, string>
+  readonly radius: Record<string, string>
   readonly duration: Record<string, string>
-  readonly easing: Record<string, string>
+  readonly ease: Record<string, string>
   readonly blur: Record<string, string>
-  readonly boxShadow: Record<string, string>
+  readonly shadow: Record<string, string>
 }
 
 /**
@@ -83,17 +81,17 @@ export interface SynraTheme {
 export function synraTheme(): SynraTheme {
   return {
     colors: synraThemeColors(),
-    fontFamily,
-    fontSize,
-    breakpoints,
+    font: fontFamily,
+    text: Object.fromEntries(
+      Object.entries(fontSize).map(([key, [fontSizeValue, lineHeight]]) => [key, { fontSize: fontSizeValue, lineHeight }]),
+    ),
+    breakpoint: breakpoints,
     // 从 `radius` 遍历出来：加一档圆角就自动多一个工具类（`rounded-control` / `-surface` / `-pill`）。
-    borderRadius: Object.fromEntries(
+    radius: Object.fromEntries(
       Object.entries(radius).map(([key]) => [kebab(key), `var(--synra-radius-${kebab(key)})`]),
     ),
-    zIndex,
-    // ★ **这两个键名是量出来的，不是猜的**：`@unocss/preset-mini@66` 的规则里
-    //   `duration-<key>` 读 `theme.duration[key]`、`ease-<key>` 读 `theme.easing[key]`，
-    //   而 `transition-*` 用的是 `theme.duration.DEFAULT` / `theme.easing.DEFAULT`。
+    // ★ 这两个键名对应 Wind4 的 theme 结构：`duration-<key>` 读 `theme.duration[key]`，
+    //   `ease-<key>` 读 `theme.ease[key]`，而 `transition-*` 使用默认值。
     //
     //   它们原来叫 `transitionDuration` / `transitionTimingFunction` —— 那是**听起来对但 UnoCSS 不读**的名字，
     //   后果是 `duration-base` 与 `ease-standard` **静默不生成**（UnoCSS 对不认识的类不报错），
@@ -103,7 +101,7 @@ export function synraTheme(): SynraTheme {
       DEFAULT: duration.base,
       ...duration,
     },
-    easing: {
+    ease: {
       DEFAULT: ease.standard,
       standard: ease.standard,
     },
@@ -111,7 +109,7 @@ export function synraTheme(): SynraTheme {
       // 全局唯一的一个模糊半径：玻璃的"厚度"是材质，不是可调参数。
       synra: `var(--synra-blur)`,
     },
-    boxShadow: {
+    shadow: {
       // 发光是一个**状态**，不是皮肤：只允许出现在焦点环、那条线的活动态、主按钮按下态。
       //
       // ★ 这里原来写的是模板串 `${glow}` —— 也就是把 token 的**值**烘进生成的 CSS（产物里是 `#7c5cff73`）。
@@ -135,8 +133,16 @@ export function presetSynra(options: SynraPresetOptions = {}): Preset {
   return {
     name: 'synra',
     theme: synraTheme(),
-    // ★ `preflight: false`：见这个文件的头部。留一份 Tailwind 的 reset，官网就用不了 tokens 档。
-    presets: [presetWind3({ preflight: false, dark: 'class' })],
+    rules: [
+      ...Object.entries(zIndex).map(([key, value]) => [
+        `z-${kebab(key)}`,
+        { 'z-index': value },
+      ] as [string, { 'z-index': number }]),
+      ...Object.entries(duration).map(([key, value]) => [
+        `duration-${kebab(key)}`,
+        { '--un-duration': value, 'transition-duration': value },
+      ] as [string, { '--un-duration': string; 'transition-duration': string }]),
+    ],
     preflights: [
       {
         getCSS: () => css(tier),
