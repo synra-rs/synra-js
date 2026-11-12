@@ -36,6 +36,7 @@ export interface PluginSnapshot {
   readonly title: string
   readonly description?: string
   readonly version: string
+  readonly localSource: boolean
   readonly publisher: string
   readonly enabled: boolean
   /**
