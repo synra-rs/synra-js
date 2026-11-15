@@ -39,6 +39,7 @@ describe('dto coverage across generated modules', () => {
     ['ui-activity.ts', 'IntentSnapshot', 'traceId', 'trace_id'],
     ['ui-activity.ts', 'IntentSnapshot', 'retry', 'retry'],
     ['ui-plugins.ts', 'PluginSnapshot', 'dataPath', 'data_path'],
+    ['ui-plugins.ts', 'PluginSnapshot', 'localSource', 'local_source'],
     ['ui-plugins.ts', 'PluginSnapshot', 'stateReason', 'state_reason'],
     ['ui-plugins.ts', 'PluginSnapshot', 'hasUi', 'has_ui'],
     ['ui-plugins.ts', 'PluginSnapshot', 'requested', 'requested'],
