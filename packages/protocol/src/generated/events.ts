@@ -87,6 +87,8 @@ export type KernelEvent =
         readonly peer: string
         readonly label: string
         readonly bytes: number
+        readonly traceId?: string
+        readonly requestId?: string
       }
     }
   | {
