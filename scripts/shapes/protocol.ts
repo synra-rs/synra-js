@@ -4,6 +4,21 @@ import { join } from 'node:path'
 import { pairingShapeProblems, requiredRecordProblems } from '../pairing-shapes'
 import { evaluateProduct, rustConvention, rustErrorCodes, tsErrorCodes } from './parsers'
 
+function rustSources(root: string): string[] {
+  const files: string[] = []
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const path = join(root, entry.name)
+    if (entry.isDirectory()) {
+      if (entry.name !== 'tests')
+        files.push(...rustSources(path))
+    }
+    else if (entry.isFile() && entry.name.endsWith('.rs')) {
+      files.push(path)
+    }
+  }
+  return files
+}
+
 export function checkProtocol(context: ShapeContext): void {
   const { jsRoot, protocolDirectory: PROTOCOL_CRATE, read, fail, evidence } = context
   const RUST_CONVENTIONS: Record<string, string | null> = {
@@ -43,13 +58,11 @@ export function checkProtocol(context: ShapeContext): void {
   const wirePath = join(jsRoot, 'packages', 'protocol', 'src', 'generated', 'wire.ts')
   const wire = read(wirePath)
 
-  const rustFiles = existsSync(PROTOCOL_CRATE)
-    ? readdirSync(PROTOCOL_CRATE).filter(name => name.endsWith('.rs'))
-    : []
+  const rustFiles = existsSync(PROTOCOL_CRATE) ? rustSources(PROTOCOL_CRATE) : []
 
   const rustSource
     = rustFiles.length > 0
-      ? [...rustFiles.map(name => read(join(PROTOCOL_CRATE, name))), read(join(context.dtoDirectory, 'pairing.rs'))].join('\n')
+      ? [...rustFiles.map(path => read(path)), read(join(context.dtoDirectory, 'pairing.rs'))].join('\n')
       : null
 
   if (rustSource === null) {
@@ -123,7 +136,11 @@ export function checkProtocol(context: ShapeContext): void {
   // ─────────────────────────────────────────────────────────────────────────────
 
   if (rustSource !== null) {
-    const frameSource = read(join(PROTOCOL_CRATE, 'frame.rs'))
+    // The protocol started with flat modules and now uses Rust's `frame/mod.rs` layout. Keep the
+    // shape guard valid across both checkouts instead of treating a harmless module move as a broken contract.
+    const framePath = join(PROTOCOL_CRATE, 'frame.rs')
+    const frameModulePath = join(PROTOCOL_CRATE, 'frame', 'mod.rs')
+    const frameSource = read(existsSync(framePath) ? framePath : frameModulePath)
     const declaration = /pub enum FrameKind\s*\{([\s\S]*?)\n\}/.exec(frameSource)
     const body = declaration?.[1]
     if (body === undefined) {
