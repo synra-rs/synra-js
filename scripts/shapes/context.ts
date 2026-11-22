@@ -18,7 +18,7 @@ export interface ShapeContext {
 export function createShapeContext(): ShapeContext {
   const jsRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
   const coreRoot = kernelCandidates(jsRoot, process.env.SYNRA_CORE_ROOT).find(candidate => existsSync(candidate))
-    ?? join(jsRoot, '..', 'synra-rust-core')
+    ?? join(jsRoot, '..', 'synra-core')
   const problems: ShapeContext['problems'] = []
   return {
     jsRoot,

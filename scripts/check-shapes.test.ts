@@ -24,8 +24,8 @@ describe('kernelCandidates', () => {
     const root = join('/work', 'synra-js')
     expect(kernelCandidates(root, '/core')).toEqual([
       '/core',
-      join('/work', 'synra-rust-core'),
-      join(root, 'synra-rust-core'),
+      join('/work', 'synra-core'),
+      join(root, 'synra-core'),
     ])
   })
 
@@ -34,7 +34,7 @@ describe('kernelCandidates', () => {
   // 而绿色的摘要和"从未对照过"的摘要在输出里长得一样。
   it('includes the layout actions/checkout produces', () => {
     const root = join('/work', 'synra-js')
-    expect(kernelCandidates(root, undefined)).toContain(join(root, 'synra-rust-core'))
+    expect(kernelCandidates(root, undefined)).toContain(join(root, 'synra-core'))
   })
 
   // 一个空的 SYNRA_CORE_ROOT 是"没给"，不是"找当前目录"：空路径会被 existsSync 判成真，

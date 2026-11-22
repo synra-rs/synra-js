@@ -72,7 +72,7 @@ export function checkProtocol(context: ShapeContext): void {
       [
         `! the Rust protocol crate was not found at ${PROTOCOL_CRATE}`,
         '  the checks that compare against Rust were skipped.',
-        '  put `synra-rust-core` beside this repository, or name the directory with SYNRA_CORE_ROOT.',
+        '  put `synra-core` beside this repository, or name the directory with SYNRA_CORE_ROOT.',
       ].join('\n'),
     )
   }

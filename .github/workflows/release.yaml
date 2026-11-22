@@ -58,13 +58,13 @@ jobs:
         # `check-shapes.ts` 拿 TypeScript 与 Rust 逐项对照（字段名、错误码、常量）。找不到内核时它会**跳过
         # 那些对照并说明**——于是一次绿色的运行和一次从未对照过的运行，在摘要里长得一样。
         #
-        # ★ 它落在**仓库里面**（`<仓库>/synra-rust-core`），因为 actions/checkout 拒绝把文件放到工作区之外。
+        # ★ 它落在**仓库里面**（`<仓库>/synra-core`），因为 actions/checkout 拒绝把文件放到工作区之外。
         # 而脚本原先只找仓库**旁边**那一个，于是这段对照在 CI 里从未跑过。脚本现在两个位置都找。
         uses: actions/checkout@v7
         continue-on-error: true
         with:
           repository: synra-rs/synra-core
-          path: synra-rust-core
+          path: synra-core
 
       - name: Install Dependencies
         # 锁文件已提交：发布构建必须可复现，所以不用 --no-frozen-lockfile

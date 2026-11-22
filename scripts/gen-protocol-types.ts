@@ -35,7 +35,7 @@ import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const jsRoot = resolve(here, '..')
-const coreRoot = join(jsRoot, '..', 'synra-rust-core')
+const coreRoot = join(jsRoot, '..', 'synra-core')
 const dtoDirectory = join(coreRoot, 'crates', 'synra-ipc', 'src', 'dto')
 const generatedDir = join(jsRoot, 'packages', 'protocol', 'src', 'generated')
 

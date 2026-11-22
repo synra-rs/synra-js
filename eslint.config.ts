@@ -61,10 +61,10 @@ export default antfu(
       //   can compare against it (that workflow's `path:` has to be inside the workspace —
       //   `actions/checkout` refuses to write outside it). It is **tooling input, not part of this
       //   repository**: without this line `eslint .` lints another project's files, and the release
-      //   failed with **320 errors in `synra-rust-core/**`'s `Cargo.toml`s**. Nobody sees that
+      //   failed with **320 errors in `synra-core/**`'s `Cargo.toml`s**. Nobody sees that
       //   locally, because there is no checkout here — the same shape as the `pnpm install` failure
       //   that preceded it.
-      'synra-rust-core/**',
+      'synra-core/**',
     ],
   },
 

@@ -2,7 +2,7 @@
 /**
  * ⚠️ **手写镜像，由脚本核对** —— 不是自动生成的。
  *
- * 来源：synra-rust-core/crates/synra-ipc/src/event.rs
+ * 来源：synra-core/crates/synra-ipc/src/event.rs
  * 核对：synra-js/scripts/check-shapes.ts
  *
  * ★ 这里曾经写着"自动生成，请勿手动修改"，并给出 `cargo test -p synra-ipc --features ts-export`

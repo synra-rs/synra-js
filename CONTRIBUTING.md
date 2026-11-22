@@ -3,7 +3,7 @@
 ## 环境与构建
 
 使用 `package.json` 中指定的 pnpm，Node 版本满足 `engines`。
-与 Rust 契约对照时，将内核检出到同级 `synra-rust-core/`。
+与 Rust 契约对照时，将内核检出到同级 `synra-core/`。
 
 ```sh
 pnpm install --frozen-lockfile

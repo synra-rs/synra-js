@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 
-const KERNEL_DIRECTORY = 'synra-rust-core'
+const KERNEL_DIRECTORY = 'synra-core'
 
 export function kernelCandidates(root: string, coreRoot: string | undefined): string[] {
   return [coreRoot, join(root, '..', KERNEL_DIRECTORY), join(root, KERNEL_DIRECTORY)].filter(
