@@ -111,7 +111,6 @@ describe('the generated CSS', () => {
     expect(css).toContain('var(--synra-blur)')
     expect(css).toContain('saturate(140%)')
     expect(css).toContain('--synra-glass-base')
-
   })
 
   it('does not add a base reset by itself', async () => {

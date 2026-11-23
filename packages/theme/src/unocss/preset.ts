@@ -63,7 +63,7 @@ export function synraThemeColors(): Record<string, string> {
 export interface SynraTheme {
   readonly colors: Record<string, string>
   readonly font: Record<string, string>
-  readonly text: Record<string, { fontSize: string; lineHeight: string }>
+  readonly text: Record<string, { fontSize: string, lineHeight: string }>
   readonly breakpoint: Record<string, string>
   readonly radius: Record<string, string>
   readonly duration: Record<string, string>
@@ -141,7 +141,7 @@ export function presetSynra(options: SynraPresetOptions = {}): Preset {
       ...Object.entries(duration).map(([key, value]) => [
         `duration-${kebab(key)}`,
         { '--un-duration': value, 'transition-duration': value },
-      ] as [string, { '--un-duration': string; 'transition-duration': string }]),
+      ] as [string, { '--un-duration': string, 'transition-duration': string }]),
     ],
     preflights: [
       {

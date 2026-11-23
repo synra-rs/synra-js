@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import { expect, it } from 'vitest'
 import { dtoOptionalityProblems, omittedDtoFields } from './dto-optionality'
 import { createShapeContext } from './shapes/context'
+import { rustSourceFiles } from './shapes/sources'
 
 const sample = `
 pub struct Sample {
@@ -34,7 +35,7 @@ it('rejects a required or absent mirror field and ignores attribute text in comm
 
 const dtoRoot = createShapeContext().dtoDirectory
 const tsRoot = resolve('packages/protocol/src/generated')
-const rust = readdirSync(dtoRoot).filter(name => name.endsWith('.rs')).map(name => readFileSync(resolve(dtoRoot, name), 'utf8')).join('\n')
+const rust = rustSourceFiles(dtoRoot).map(path => readFileSync(path, 'utf8')).join('\n')
 const mirror = readdirSync(tsRoot).filter(name => name.endsWith('.ts')).map(name => readFileSync(resolve(tsRoot, name), 'utf8')).join('\n')
 
 it('checks actual serialized DTO presence across the domain modules', () => {

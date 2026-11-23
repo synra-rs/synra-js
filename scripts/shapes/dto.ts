@@ -2,6 +2,7 @@ import type { ShapeContext } from './context'
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { dtoOptionalityProblems } from '../dto-optionality'
+import { rustSourceFiles } from './sources'
 
 export function checkDtos(context: ShapeContext): void {
   const { jsRoot, protocolDirectory: PROTOCOL_CRATE, dtoDirectory: DTO_CRATE, metricsDirectory: METRICS_CRATE, read, fail, evidence } = context
@@ -31,22 +32,7 @@ export function checkDtos(context: ShapeContext): void {
         if (!existsSync(root)) {
           continue
         }
-        /** 该目录下的 `.rs`，递归。 */
-        const rustFiles: string[] = []
-        const walk = (directory: string): void => {
-          for (const entry of readdirSync(directory, { withFileTypes: true })) {
-            const full = join(directory, entry.name)
-            if (entry.isDirectory()) {
-              walk(full)
-            }
-            else if (entry.name.endsWith('.rs')) {
-              rustFiles.push(full)
-            }
-          }
-        }
-        walk(root)
-
-        for (const file of rustFiles) {
+        for (const file of rustSourceFiles(root)) {
           const body = read(file)
           if (root === dtoDirectory)
             serializedDtos.push(body)
