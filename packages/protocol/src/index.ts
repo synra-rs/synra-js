@@ -17,7 +17,6 @@
  */
 
 export type { CredentialCleanupReport, CredentialEnrollment, CredentialRecovery, CredentialRepairReport, CredentialSnapshot } from './generated/credentials'
-
 export type {
   EventVerdict,
   KernelEvent,
@@ -92,6 +91,8 @@ export type {
   TransferSummary,
   UpdateInfo,
 } from './generated/ui'
+
+export type { RegistryProblem } from './generated/ui-registry'
 
 export type {
   // 身份
