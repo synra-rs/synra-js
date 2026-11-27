@@ -24,6 +24,9 @@ describe('device changes and transfer progress', () => {
       state: 'transferring',
       receivedBytes: 1,
       totalBytes: 2,
+      revision: 1,
+      blocksDone: 1,
+      blocksTotal: 2,
       ratio: 0.5,
     }
     // A different transfer's progress must not reach this handler, or a UI showing two transfers

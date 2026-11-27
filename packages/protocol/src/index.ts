@@ -94,6 +94,7 @@ export type {
 } from './generated/ui'
 
 export type { RegistryProblem } from './generated/ui-registry'
+export type { PluginTransferFailure, PluginTransferState, PluginTransferStatus } from './generated/ui-transfer'
 
 export type {
   // 身份

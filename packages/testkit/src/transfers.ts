@@ -13,15 +13,24 @@ export class MockTransfers {
     this.namespace = {
       send: async req => execution.run('transfer', 'send', [req], () => {
         const transferId = nextId()
-        this.states.set(transferId, { transferId, state: 'pending', receivedBytes: 0, totalBytes: req.file.size })
+        this.states.set(transferId, {
+          transferId,
+          state: 'pending',
+          receivedBytes: 0,
+          totalBytes: req.file.size,
+          blocksDone: 0,
+          // The simulated transport treats the blob as one block. Fixtures can report a multi-block send.
+          blocksTotal: 1,
+          revision: 0,
+        })
         return transferId
       }, { capability: 'file:transfer:send' }),
       status: async id => execution.run('transfer', 'status', [id], () => {
         const state = this.states.get(id)
         if (state === undefined)
-          throw createSynraError('invalid_argument', { field: 'transferId', reason: 'unknown transfer' })
+          throw createSynraError('invalid_argument', { transferId: id, reason: 'transfer_not_found' })
         return { ...state }
-      }),
+      }, { capability: 'file:transfer:send' }),
       onProgress: (id, handler) => execution.sync('transfer', 'onProgress', [id], () => {
         const handlers = this.watchers.get(id) ?? new Set()
         handlers.add(handler)

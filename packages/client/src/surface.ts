@@ -21,7 +21,7 @@
  * 运行时只有宿主一个提供者，让它实现最简单，而这条决定了本包能始终保持零运行时。
  */
 
-import type { DeviceId, PluginDeviceTarget, PluginId, RequestId, TransferId } from '@synra/protocol'
+import type { DeviceId, PluginDeviceTarget, PluginId, PluginTransferStatus, RequestId, TransferId } from '@synra/protocol'
 
 import type { SynraFetchInit, SynraResponse } from './http'
 
@@ -253,30 +253,11 @@ export interface TransferNamespace {
   onProgress(id: TransferId, handler: (progress: TransferProgress) => void): Unsubscribe
 }
 
-/** 一次传输的状态。 */
-export interface TransferStatus {
-  readonly transferId: TransferId
-  readonly state:
-    | 'pending'
-    | 'offered'
-    | 'accepted'
-    | 'transferring'
-    | 'paused'
-    | 'verifying'
-    | 'completed'
-    | 'failed'
-    | 'cancelled'
-  readonly receivedBytes: number
-  readonly totalBytes: number
-  readonly error?: import('@synra/protocol').SynraError
-}
+/** 宿主记录的传输状态。 */
+export type TransferStatus = PluginTransferStatus
 
 /** 进度快照。与线上类型同名但这里是给作者用的视图。 */
-export interface TransferProgress {
-  readonly transferId: TransferId
-  readonly state: TransferStatus['state']
-  readonly receivedBytes: number
-  readonly totalBytes: number
+export interface TransferProgress extends TransferStatus {
   /** 已完成的比例，`0` 到 `1`。总长为零时是 `0` 而不是 `NaN`。 */
   readonly ratio: number
 }
