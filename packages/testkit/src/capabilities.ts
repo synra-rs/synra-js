@@ -77,4 +77,12 @@ export class CapabilityPolicy {
     const candidate = parseCapability(text)
     return candidate !== undefined && this.grants.some(grant => matches(grant, candidate))
   }
+
+  /** Each usable fetch grant explicitly names the destination. */
+  canFetch(host: string, method: string): boolean {
+    const destination = ['network', 'fetch', host]
+    const operation = [...destination, method]
+    return this.grants.some(grant => grant[0] === 'network' && grant[1] === 'fetch' && grant[2] === host
+      && (matches(grant, destination) || matches(grant, operation)))
+  }
 }

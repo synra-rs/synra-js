@@ -58,4 +58,23 @@ describe('network', () => {
     const error = await expectCode(synra.network.fetch('https://a.b.c:8443/p?q=1'), 'capability_denied')
     expect(error.actions).toContainEqual({ kind: 'requestCapability', capability: 'network:fetch:a.b.c:GET' })
   })
+
+  it('requires a concrete host grant for the requested method', async () => {
+    const synra = createMockClient({
+      capabilities: ['network:fetch:api.example.com:GET', 'network:fetch:**'],
+      hostFeatures: ['network.fetch'],
+    })
+    synra.stub('network', 'fetch', createMockResponse(''))
+    await expectCode(synra.network.fetch('https://api.example.com/x', { method: 'POST' }), 'capability_denied')
+  })
+
+  it('checks the length of the URL sent to the transport', async () => {
+    const synra = createMockClient({
+      capabilities: ['network:fetch:api.example.com'],
+      hostFeatures: ['network.fetch'],
+    })
+    synra.stub('network', 'fetch', createMockResponse(''))
+    const input = `https://api.example.com/${'é'.repeat(400)}`
+    await expectCode(synra.network.fetch(input), 'invalid_argument')
+  })
 })

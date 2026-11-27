@@ -3,6 +3,8 @@ import type { MockExecution } from './execution.js'
 import { parseCapability } from './capabilities.js'
 import { createSynraError } from './errors/index.js'
 
+const MAX_URL_BYTES = 2048
+
 /** One byte source for all mutually exclusive response readers. Each fixture is one response. */
 export function createMockResponse(body: string | Uint8Array, options: {
   readonly status?: number
@@ -53,7 +55,8 @@ function hasForbiddenUrlCharacter(input: string): boolean {
 function authorize(execution: MockExecution, input: string, init: SynraFetchInit): void {
   if (init.timeoutMs !== undefined || (init.body !== undefined && typeof init.body !== 'string'))
     throw createSynraError('unsupported', { feature: 'network.fetch request options' })
-  if (new TextEncoder().encode(input).length > 2048 || hasForbiddenUrlCharacter(input) || !/^https?:\/\/[^/?#]/i.test(input))
+  const encoder = new TextEncoder()
+  if (typeof input !== 'string' || encoder.encode(input).length > MAX_URL_BYTES || hasForbiddenUrlCharacter(input) || !/^https?:\/\/[^/?#]/i.test(input))
     throw createSynraError('invalid_argument')
   let url: URL
   try {
@@ -62,14 +65,16 @@ function authorize(execution: MockExecution, input: string, init: SynraFetchInit
   catch {
     throw createSynraError('invalid_argument')
   }
+  if (encoder.encode(url.href).length > MAX_URL_BYTES)
+    throw createSynraError('invalid_argument')
   const host = url.hostname.toLowerCase().replace(/\.$/, '')
-  const method = init.method ?? 'GET'
-  const destination = `network:fetch:${host}`
-  const operation = `${destination}:${method}`
+  const method = init.method === undefined ? 'GET' : init.method
+  const operation = `network:fetch:${host}:${method}`
   if (host.includes('*') || parseCapability(operation) === undefined || !['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'].includes(method))
     throw createSynraError('invalid_argument')
-  if (!execution.capabilities.can(destination))
-    execution.require(operation)
+  execution.require(operation, execution.capabilities.canFetch(host, method))
+  if (url.protocol !== 'https:')
+    throw createSynraError('scheme_not_allowed', { reason: 'plain http is not allowed by the host' })
 }
 
 export function createNetwork(execution: MockExecution): NetworkNamespace {

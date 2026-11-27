@@ -43,8 +43,8 @@ export class MockExecution {
     this.stubs.set(`${ns}.${method}`, { kind: 'failure', reason })
   }
 
-  require(capability: string): void {
-    if (!this.capabilities.can(capability)) {
+  require(capability: string, allowed = this.capabilities.can(capability)): void {
+    if (!allowed) {
       throw synraError('capability_denied', `the plugin has not been granted ${capability}`, {
         actions: [{ kind: 'requestCapability', capability }],
       })
