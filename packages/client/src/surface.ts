@@ -138,8 +138,16 @@ export interface LogNamespace {
   child(prefix: string): LogNamespace
 }
 
+/** The range in which this subscription lost one or more custom events. */
+export interface SubscriptionGap {
+  readonly afterSeq: number
+  readonly throughSeq: number
+}
+
 /** 事件订阅选项。 */
 export interface SubscriptionOptions {
+  /** A recovered stream missed custom events. New occurrences continue on the same subscription. */
+  readonly onGap?: (gap: SubscriptionGap) => void
   /** Reports asynchronous registration, delivery and recovery failures. */
   readonly onError?: (error: import('@synra/protocol').SynraError) => void
 }

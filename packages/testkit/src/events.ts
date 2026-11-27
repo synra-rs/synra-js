@@ -2,7 +2,7 @@ import type { EventNamespace, SubscriptionOptions, Unsubscribe } from '@synra/cl
 import type { PluginDevicesChanged, PluginTransferStatus, TransferId } from '@synra/protocol'
 import type { MockExecution } from './execution.js'
 import { asSynraError, createSynraError } from './errors/index.js'
-import { compileEventPattern } from './event-pattern.js'
+import { compileEventPattern, isCustomEventName } from './event-pattern.js'
 
 interface Subscription {
   readonly matches: (name: string, payload: unknown) => boolean
@@ -26,14 +26,16 @@ export class MockEvents {
         const match = compileEventPattern(pattern)
         return execution.sync('event', 'subscribe', [pattern], () => {
           return this.register((name) => {
-            const rule = TOPIC_GRANTS.find(([topic]) => topic === name)
-            return (match?.(name) ?? false) && (rule === undefined || execution.capabilities.can(rule[1]))
+            const grant = isCustomEventName(name) ? `event:subscribe:${name}` : TOPIC_GRANTS.find(([topic]) => topic === name)?.[1]
+            return (match?.(name) ?? false) && (grant === undefined || execution.capabilities.can(grant))
           }, payload => handler(payload as T), options)
         }, {
           feature: 'event.subscribe',
           validate: () => {
             if (match === undefined)
               throw createSynraError('invalid_argument', { field: 'pattern' })
+            if (isCustomEventName(pattern))
+              execution.require(`event:subscribe:${pattern}`)
             const matched = TOPIC_GRANTS.filter(([topic]) => match(topic))
             const first = matched[0]
             if (first !== undefined && !matched.some(([, grant]) => execution.capabilities.can(grant)))
@@ -63,6 +65,8 @@ export class MockEvents {
   }
 
   deliver(name: string, payload: unknown): number {
+    if (name.startsWith('_plugin.') && (!isCustomEventName(name) || payload === null || typeof payload !== 'object' || Array.isArray(payload)))
+      return 0
     let delivered = 0
     for (const subscription of [...this.subscribers]) {
       if (!this.subscribers.has(subscription) || !subscription.matches(name, payload))

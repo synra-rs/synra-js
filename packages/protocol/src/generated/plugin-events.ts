@@ -15,9 +15,17 @@ export interface PluginDevicesChanged {
   readonly devices: readonly PluginDeviceTarget[]
 }
 
+export type PluginCustomEventName = `_plugin.${string}.${string}`
+
+export interface PluginCustomEvent {
+  readonly name: PluginCustomEventName
+  readonly payload: Readonly<Record<string, unknown>>
+}
+
 export type PluginEvent
   = | { readonly name: 'device.changed', readonly payload: PluginDevicesChanged }
     | { readonly name: 'transfer.progress', readonly payload: PluginTransferStatus }
+    | PluginCustomEvent
 
 export type PluginEventEnvelope = PluginEvent & { readonly seq: number, readonly at: number }
 
@@ -26,4 +34,5 @@ export type PluginEventPoll = PluginEventEnvelope | { readonly resync: true }
 export interface PluginEventRecovery {
   readonly seq: number
   readonly events: readonly PluginEvent[]
+  readonly unreplayedSubscriptionIds?: readonly number[]
 }
