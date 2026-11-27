@@ -17,6 +17,10 @@ Synra 的 JavaScript / TypeScript 库，连接插件页面与宿主，也为应�
 
 类型声明不会提供真实宿主连接。独立浏览器预览可使用 testkit；真实设备、授权与平台效果需要在 Synra 宿主中验证。
 
+testkit 默认模拟其已实现的方法。用 `APP_PROFILE` 模拟当前 App 的方法可用性，再分别传入平台能力和插件授权。授权应采用清单 DSL，例如 `platform:read-clipboard`；全局 `*` 会被拒绝。`calls` 记录实际调用与拒绝，`stub` 替换通过策略后的响应，`stubFailure` 明确配置失败。
+
+测试应显式提供设备选择与 HTTP 响应。`pickedDevice` 提供用户选择（`null` 表示取消），`createMockResponse` 从同一份内容创建互斥的读取方法。传输测试可用 `reportProgress` 推进状态，查询未知传输 ID 会失败。
+
 ## 为插件页面添加类型
 
 安装与目标宿主匹配的客户端声明：
