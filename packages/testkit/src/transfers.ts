@@ -24,7 +24,13 @@ export class MockTransfers {
           revision: 0,
         })
         return transferId
-      }, { capability: 'file:transfer:send' }),
+      }, {
+        capability: 'file:transfer:send',
+        validate: () => {
+          if (req.contextId !== undefined)
+            throw createSynraError('unsupported', { feature: 'transfer.send contextId' })
+        },
+      }),
       status: async id => execution.run('transfer', 'status', [id], () => {
         const state = this.states.get(id)
         if (state === undefined)

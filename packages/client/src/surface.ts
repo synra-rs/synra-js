@@ -248,7 +248,7 @@ export interface TransferNamespace {
     to: DeviceId
     file: Blob
     fileName: string
-    /** 同一批传输共用的标识，接收方据此把它们归到一起。 */
+    /** 支持分组的宿主用此标识归并同一批传输。当前 App 的插件页面会以 `unsupported` 拒绝此选项。 */
     contextId?: string
   }): Promise<TransferId>
   status(id: TransferId): Promise<TransferStatus>
