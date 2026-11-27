@@ -2,6 +2,18 @@ import { describe, expect, it, vi } from 'vitest'
 import { createMockClient } from '../src/index'
 
 describe('events', () => {
+  it('reports a subscriber exception and still delivers to the remaining listeners', () => {
+    const client = createMockClient({ capabilities: ['device:list'] })
+    const onError = vi.fn()
+    const second = vi.fn()
+    client.event.subscribe('device.changed', () => {
+      throw new Error('consumer failed')
+    }, { onError })
+    client.event.subscribe('device.changed', second)
+    client.setDevices([])
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ code: 'internal' }))
+    expect(second).toHaveBeenCalledWith({ devices: [] })
+  })
   it('rejects malformed patterns before registering callbacks', () => {
     const client = createMockClient()
     const listener = vi.fn()
@@ -12,7 +24,7 @@ describe('events', () => {
   })
 
   it('gives each subscription an independent cleanup even for the same callback', () => {
-    const client = createMockClient()
+    const client = createMockClient({ capabilities: ['device:list'] })
     const listener = vi.fn()
     const first = client.event.subscribe('device.*', listener)
     const second = client.event.subscribe('device.*', listener)

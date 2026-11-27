@@ -38,7 +38,7 @@ export class MockSynraClient implements SynraClient {
   constructor(private readonly options: MockOptions = {}) {
     this.execution = new MockExecution(snapshotProfile(options.profile ?? SIMULATED_PROFILE, options.hostFeatures, options.platformCapabilities ?? []), options.capabilities ?? [])
     this.events = new MockEvents(this.execution)
-    this.devices = new MockDevices(this.execution, options)
+    this.devices = new MockDevices(this.execution, options, this.events)
     this.transfers = new MockTransfers(this.execution, () => this.id('transfer'))
     this.env = createEnvironment(this.execution, options)
     this.log = createLog(this.execution)

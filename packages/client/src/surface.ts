@@ -138,6 +138,12 @@ export interface LogNamespace {
   child(prefix: string): LogNamespace
 }
 
+/** 事件订阅选项。 */
+export interface SubscriptionOptions {
+  /** Reports asynchronous registration, delivery and recovery failures. */
+  readonly onError?: (error: import('@synra/protocol').SynraError) => void
+}
+
 /** 事件。 */
 export interface EventNamespace {
   /**
@@ -152,7 +158,7 @@ export interface EventNamespace {
    * ★ **一定返回退订函数**。插件页面卸载时不退订会泄漏，而一个可能返回 `undefined` 的签名会让
    * 作者忘记处理那一支。
    */
-  subscribe<T = unknown>(pattern: string, handler: (payload: T) => void): Unsubscribe
+  subscribe<T = unknown>(pattern: string, handler: (payload: T) => void, options?: SubscriptionOptions): Unsubscribe
 }
 
 /** 设备。 */
@@ -163,8 +169,8 @@ export interface DeviceNamespace {
   send(req: { to: DeviceId, event: string, payload?: unknown }): Promise<void>
   /** 发给所有已配对且在线的设备。 */
   broadcast(req: { event: string, payload?: unknown }): Promise<void>
-  /** 设备集合变化。宿主侧包了一层订阅与合并去重。 */
-  onChange(handler: (devices: DeviceTarget[]) => void): Unsubscribe
+  /** 设备集合变化。需要 device:list。 */
+  onChange(handler: (devices: DeviceTarget[]) => void, options?: SubscriptionOptions): Unsubscribe
   /**
    * 调起**宿主提供的选设备界面**。
    *

@@ -51,6 +51,7 @@ export type {
   PlatformNamespace,
   SelfNamespace,
   StorageNamespace,
+  SubscriptionOptions,
   // 注入对象
   SynraClient,
   TransferNamespace,

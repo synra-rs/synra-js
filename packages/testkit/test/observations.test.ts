@@ -5,7 +5,7 @@ import { devices, expectCode } from './fixtures'
 
 describe('device changes and transfer progress', () => {
   it('notifies device watchers when the set changes', () => {
-    const synra = createMockClient({ hostFeatures: ['device.onChange'], devices })
+    const synra = createMockClient({ capabilities: ['device:list'], hostFeatures: ['device.onChange'], devices })
     const handler = vi.fn()
     const unsubscribe = synra.device.onChange(handler)
     synra.setDevices([devices[0]!])
