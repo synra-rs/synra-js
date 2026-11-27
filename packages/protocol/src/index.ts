@@ -95,6 +95,15 @@ export type {
 
 export type { RegistryProblem } from './generated/ui-registry'
 export type { PluginTransferFailure, PluginTransferState, PluginTransferStatus } from './generated/ui-transfer'
+export type {
+  PluginUploadAppend,
+  PluginUploadBegin,
+  PluginUploadChunk,
+  PluginUploadEnded,
+  PluginUploadHandle,
+  PluginUploadOpened,
+  PluginUploadSent,
+} from './generated/ui-upload'
 
 export type {
   // 身份

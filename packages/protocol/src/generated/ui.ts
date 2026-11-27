@@ -4,6 +4,7 @@ export type * from './ui-diagnostics'
 export type * from './ui-plugins'
 export type * from './ui-input'
 export type * from './ui-transfer'
+export type * from './ui-upload'
 
 /** 本机身份。 */
 export interface IdentitySnapshot {
