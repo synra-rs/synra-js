@@ -21,7 +21,7 @@
  * 运行时只有宿主一个提供者，让它实现最简单，而这条决定了本包能始终保持零运行时。
  */
 
-import type { DeviceId, PluginId, RequestId, TransferId } from '@synra/protocol'
+import type { DeviceId, PluginDeviceTarget, PluginId, RequestId, TransferId } from '@synra/protocol'
 
 import type { SynraFetchInit, SynraResponse } from './http'
 
@@ -195,13 +195,7 @@ export interface PickOptions {
 }
 
 /** 一台设备，给作者的视图。 */
-export interface DeviceTarget {
-  readonly deviceId: DeviceId
-  readonly displayName: string
-  /** Discovery can know the device kind before it knows the remote OS. */
-  readonly platform: 'windows' | 'macos' | 'linux' | 'android' | 'ios' | 'desktop' | 'headless'
-  readonly online: boolean
-}
+export type DeviceTarget = PluginDeviceTarget
 
 /**
  * 插件的键值存储。

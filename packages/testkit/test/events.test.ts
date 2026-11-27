@@ -2,6 +2,27 @@ import { describe, expect, it, vi } from 'vitest'
 import { createMockClient } from '../src/index'
 
 describe('events', () => {
+  it('rejects malformed patterns before registering callbacks', () => {
+    const client = createMockClient()
+    const listener = vi.fn()
+    expect(() => client.event.subscribe('device.**', listener)).toThrow()
+    expect(client.calls[0]?.refused?.code).toBe('invalid_argument')
+    client.deliver('device.changed', {})
+    expect(listener).not.toHaveBeenCalled()
+  })
+
+  it('gives each subscription an independent cleanup even for the same callback', () => {
+    const client = createMockClient()
+    const listener = vi.fn()
+    const first = client.event.subscribe('device.*', listener)
+    const second = client.event.subscribe('device.*', listener)
+    expect(client.deliver('device.changed', {})).toBe(2)
+    first()
+    first()
+    expect(client.deliver('device.changed', {})).toBe(1)
+    second()
+    expect(client.deliver('device.changed', {})).toBe(0)
+  })
   it('delivers a payload to a subscriber', () => {
     const synra = createMockClient()
     const handler = vi.fn()

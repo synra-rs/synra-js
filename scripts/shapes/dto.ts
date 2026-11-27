@@ -27,7 +27,9 @@ export function checkDtos(context: ShapeContext): void {
        * 都报成"内核里没有同名 DTO" —— 于是检查第一次跑就红，而一个一直红的检查等于没有检查。
        */
       const serializedDtos: string[] = []
-      const rustRoots = [dtoDirectory, protocolDirectory, METRICS_CRATE]
+      // Event envelopes are mirrored as intersections and checked by serde fixtures in the App.
+      // Index the Rust event declarations here so their named payloads have a source in reverse coverage.
+      const rustRoots = [dtoDirectory, join(dtoDirectory, '..', 'event'), protocolDirectory, METRICS_CRATE]
       for (const root of rustRoots) {
         if (!existsSync(root)) {
           continue

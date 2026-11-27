@@ -1,45 +1,49 @@
 import type { EventNamespace, Unsubscribe } from '@synra/client'
 import type { MockExecution } from './execution.js'
+import { createSynraError } from './errors/index.js'
+import { compileEventPattern } from './event-pattern.js'
 
-/** One-segment event wildcard; capability wildcards use a different grammar. */
-export function matches(pattern: string, name: string): boolean {
-  const patternParts = pattern.split('.')
-  const nameParts = name.split('.')
-  return patternParts.length === nameParts.length
-    && patternParts.every((part, index) => part === '*' || part === nameParts[index])
+interface Subscription {
+  readonly matches: (name: string) => boolean
+  readonly handler: (payload: unknown) => void
 }
 
 export class MockEvents {
-  private readonly subscribers = new Map<string, Set<(payload: unknown) => void>>()
+  private readonly subscribers = new Set<Subscription>()
   readonly namespace: EventNamespace
 
   constructor(execution: MockExecution) {
     this.namespace = {
       emit: async (name, payload) => execution.run('event', 'emit', [name, payload], () => undefined),
-      subscribe: <T = unknown>(pattern: string, handler: (payload: T) => void): Unsubscribe =>
-        execution.sync('event', 'subscribe', [pattern], () => {
-          const handlers = this.subscribers.get(pattern) ?? new Set()
-          const wrapped = handler as (payload: unknown) => void
-          handlers.add(wrapped)
-          this.subscribers.set(pattern, handlers)
-          return () => {
-            handlers.delete(wrapped)
-            if (handlers.size === 0)
-              this.subscribers.delete(pattern)
+      subscribe: <T = unknown>(pattern: string, handler: (payload: T) => void): Unsubscribe => {
+        const match = compileEventPattern(pattern)
+        return execution.sync('event', 'subscribe', [pattern], () => {
+          const subscription: Subscription = {
+            matches: name => match?.(name) ?? false,
+            handler: payload => handler(payload as T),
           }
-        }, { feature: 'event.subscribe' }),
+          this.subscribers.add(subscription)
+          return () => {
+            this.subscribers.delete(subscription)
+          }
+        }, {
+          feature: 'event.subscribe',
+          validate: () => {
+            if (match === undefined)
+              throw createSynraError('invalid_argument', { field: 'pattern' })
+          },
+        })
+      },
     }
   }
 
   deliver(name: string, payload: unknown): number {
     let delivered = 0
-    for (const [pattern, handlers] of this.subscribers) {
-      if (!matches(pattern, name))
+    for (const subscription of [...this.subscribers]) {
+      if (!this.subscribers.has(subscription) || !subscription.matches(name))
         continue
-      for (const handler of [...handlers]) {
-        handler(payload)
-        delivered++
-      }
+      subscription.handler(payload)
+      delivered++
     }
     return delivered
   }

@@ -1,7 +1,7 @@
 /** Policy-aware local client; native effects require explicit fixtures and host integration tests. */
 export { createMockClient, MockSynraClient } from './client.js'
 export { synraError } from './error-constructor.js'
-export { matches } from './events.js'
+export { matches } from './event-pattern.js'
 export type { RecordedCall } from './execution.js'
 export { createMockResponse } from './network.js'
 export type { MockOptions } from './options.js'
