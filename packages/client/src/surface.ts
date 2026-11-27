@@ -245,12 +245,10 @@ export interface TransferNamespace {
   }): Promise<TransferId>
   status(id: TransferId): Promise<TransferStatus>
   /**
-   * 订阅进度。
-   *
-   * ★ 与 `event.subscribe` 一样**一定返回退订函数**：进度回调挂在一次传输上，不退订的话传输
-   * 结束后回调还会被调用。
+   * 订阅本插件发起的传输。先交付当前状态，后续按 revision 发送更新。
+   * 保留期内可以订阅已结束的传输。用完时调用返回的退订函数。
    */
-  onProgress(id: TransferId, handler: (progress: TransferProgress) => void): Unsubscribe
+  onProgress(id: TransferId, handler: (progress: TransferProgress) => void, options?: SubscriptionOptions): Unsubscribe
 }
 
 /** 宿主记录的传输状态。 */

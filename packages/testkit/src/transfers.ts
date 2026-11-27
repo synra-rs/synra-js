@@ -1,15 +1,15 @@
 import type { TransferNamespace, TransferProgress, TransferStatus } from '@synra/client'
 import type { TransferId } from '@synra/protocol'
+import type { MockEvents } from './events.js'
 import type { MockExecution } from './execution.js'
 import { createSynraError } from './errors/index.js'
 
 /** Observable fixture state only; no network transport or automatic completion. */
 export class MockTransfers {
   private readonly states = new Map<TransferId, TransferStatus>()
-  private readonly watchers = new Map<TransferId, Set<(progress: TransferProgress) => void>>()
   readonly namespace: TransferNamespace
 
-  constructor(execution: MockExecution, nextId: () => TransferId) {
+  constructor(execution: MockExecution, nextId: () => TransferId, private readonly events: MockEvents) {
     this.namespace = {
       send: async req => execution.run('transfer', 'send', [req], () => {
         const transferId = nextId()
@@ -31,16 +31,30 @@ export class MockTransfers {
           throw createSynraError('invalid_argument', { transferId: id, reason: 'transfer_not_found' })
         return { ...state }
       }, { capability: 'file:transfer:send' }),
-      onProgress: (id, handler) => execution.sync('transfer', 'onProgress', [id], () => {
-        const handlers = this.watchers.get(id) ?? new Set()
-        handlers.add(handler)
-        this.watchers.set(id, handlers)
-        return () => {
-          handlers.delete(handler)
-          if (handlers.size === 0)
-            this.watchers.delete(id)
+      onProgress: (id, handler, options) => execution.sync('transfer', 'onProgress', [id], () => {
+        let active = true
+        let revision = -1
+        const emit = (state: TransferStatus): void => {
+          if (active && state.revision > revision) {
+            revision = state.revision
+            handler({ ...state, ratio: state.totalBytes === 0 ? 0 : Math.min(1, state.receivedBytes / state.totalBytes) })
+          }
         }
-      }, { feature: 'transfer.onProgress' }),
+        const off = this.states.has(id) ? events.onTransfer(id, emit, options) : undefined
+        queueMicrotask(() => {
+          if (!active)
+            return
+          const current = this.states.get(id)
+          if (off === undefined || current === undefined)
+            events.report(createSynraError('invalid_argument', { transferId: id, reason: 'transfer_not_found' }), options)
+          else
+            events.notify(emit, current, options)
+        })
+        return () => {
+          active = false
+          off?.()
+        }
+      }, { feature: 'transfer.onProgress', capability: 'file:transfer:send' }),
     }
   }
 
@@ -49,8 +63,11 @@ export class MockTransfers {
   }
 
   report(progress: TransferProgress): void {
-    this.set(progress)
-    for (const watcher of [...(this.watchers.get(progress.transferId) ?? [])])
-      watcher(progress)
+    const { ratio: _, ...status } = progress
+    const previous = this.states.get(status.transferId)
+    if (previous !== undefined && (previous.revision >= status.revision || previous.endedAtMs !== undefined))
+      return
+    this.set(status)
+    this.events.deliver('transfer.progress', status)
   }
 }

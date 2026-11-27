@@ -16,9 +16,8 @@ describe('device changes and transfer progress', () => {
   })
 
   it('notifies progress watchers for one transfer only', () => {
-    const synra = createMockClient({ hostFeatures: ['transfer.onProgress'] })
+    const synra = createMockClient({ hostFeatures: ['transfer.onProgress'], capabilities: ['file:transfer:send'] })
     const handler = vi.fn()
-    synra.transfer.onProgress('t1', handler)
     const progress: TransferProgress = {
       transferId: 't2',
       state: 'transferring',
@@ -29,6 +28,8 @@ describe('device changes and transfer progress', () => {
       blocksTotal: 2,
       ratio: 0.5,
     }
+    synra.setTransferStatus({ ...progress, transferId: 't1', revision: 0 })
+    const off = synra.transfer.onProgress('t1', handler)
     // A different transfer's progress must not reach this handler, or a UI showing two transfers
     // would update the wrong bar.
     synra.reportProgress(progress)
@@ -36,6 +37,9 @@ describe('device changes and transfer progress', () => {
 
     synra.reportProgress({ ...progress, transferId: 't1' })
     expect(handler).toHaveBeenCalledTimes(1)
+    synra.reportProgress({ ...progress, transferId: 't1', receivedBytes: 0 })
+    expect(handler).toHaveBeenCalledTimes(1)
+    off()
   })
 
   it('returns a transfer id from a send', async () => {

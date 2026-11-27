@@ -266,13 +266,13 @@ export interface TransferProgress {
 
 /** 传输被中止的原因。 */
 export type TransferAbortReason =
-  | 'cancelled'
-  | 'rejected'
-  | 'timeout'
-  | 'integrity'
-  | 'diskFull'
-  | 'peerGone'
-  | 'tooLarge'
+  | 'user_cancelled'
+  | 'digest_mismatch'
+  | 'too_large'
+  | 'io_error'
+  | 'idle_timeout'
+  | 'total_timeout'
+  | 'peer_rejected'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 发现（§9）
